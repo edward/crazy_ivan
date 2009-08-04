@@ -1,0 +1,7 @@
+= crazy_ivan
+
+Description goes here.
+
+== Copyright
+
+Copyright (c) 2009 Edward Ocampo-Gooding. See LICENSE for details.
