@@ -5,7 +5,7 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "crazy_ivan"
-    gem.summary = %Q{TODO}
+    gem.summary = %Q{Crazy Ivan: the really simple continous integration tool}
     gem.email = "edward@edwardog.net"
     gem.homepage = "http://github.com/edward/crazy_ivan"
     gem.authors = ["Edward Ocampo-Gooding"]
