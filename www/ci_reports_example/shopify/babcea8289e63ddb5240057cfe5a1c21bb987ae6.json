@@ -1,0 +1,9 @@
+{
+ project: shopify,
+ version:343adbc323, 
+ setup: '.................',
+ setup_errorcode: 0,
+ 
+ test: '.................',
+ test_errorcode: 0,
+}

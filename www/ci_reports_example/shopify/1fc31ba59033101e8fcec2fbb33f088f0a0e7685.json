@@ -1,0 +1,9 @@
+{
+ project: shopify,
+ version: 1fc31ba59033101e8fcec2fbb33f088f0a0e7685, 
+ setup: '.....[setup output]......',
+ setup_errorcode: 0,
+ 
+ test: '.....[test run output]......',
+ test_errorcode: 0,
+}

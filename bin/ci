@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby -wKU
+
+require 'lib/crazy_ivan.rb'

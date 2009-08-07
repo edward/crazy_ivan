@@ -1,7 +1,65 @@
 = crazy_ivan
 
-Description goes here.
+Crazy Ivan (CI) is simplest possible continuous integration tool.
 
-== Copyright
+== Usage
+
+  $ ci setup  # creates the ci directory,
+              # drops a configuration file,
+              # sets a cron job to run ci
+
+== How this works
+
+  * ci (the script) is executed periodically by cron
+  * ci looks in directories one level deeper than where it’s been called
+  
+    => asked to run in /projects
+                         /shopify
+        looks in each    /liquid
+        of these dirs    /active_merchant
+             ========>   /active_shipping
+
+    => within each directory, it expects
+       two executable scripts:
+       
+          /shopify
+            /ci
+              setup
+              version
+              run-tests
+
+  * ci first executes `setup` and captures the output:
+  
+      #!/usr/bin/env bash
+      
+      cd ..
+      git pull  # Whatever your application
+                # needs to do to update your
+                # source from a repository
+  
+  * ci then exectutes `version` and captures the output:
+  
+      #!/usr/bin/env bash
+      
+      cd ..
+      git show  # Get a version hash/fingerprint/id from
+                # your version control system
+  
+  * ci then executes `run-tests` and captures the output:
+      
+      #!/usr/bin/env bash
+      
+      cd ..
+      rake db:migrate    # This task prepares the application
+      rake test          # for running tests, then runs them
+
+  * At each of these three steps, the output is repackaged
+    into a .json file to be consumed in the directory holding
+    the static html.
+
+
+== Credits and Copyright
+
+Heavily inspired/first code sketch written by Tobi Lütke.
 
 Copyright (c) 2009 Edward Ocampo-Gooding. See LICENSE for details.

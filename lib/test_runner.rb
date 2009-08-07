@@ -1,6 +1,3 @@
-
-output_directory = ARGV[1]
-
 class TestRunner
 
   class Result < Struct.new(:setup, :test_output, :setup_errorcode, :test_errorcode)
@@ -45,16 +42,4 @@ class TestRunner
     end
   end
   
-end
-
-
-Dir['*'].each do |dir|
-  
-  report = ReportAssembler.new
-
-  if File.directory?(dir)
-    report.tests.push TestRunner.new(dir).invoke
-  end
-  
-  report.generate  
 end

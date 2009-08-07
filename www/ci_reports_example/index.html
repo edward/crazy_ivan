@@ -1,0 +1,35 @@
+
+
+use http://json-template.googlecode.com/svn/trunk/doc/Introducing-JSON-Template.html
+
+
+
+new Ajax('projects.json', onSuccess: function(t){
+  
+  var projects = eval(t.responseText)
+  
+  projects.each(function(proj) {
+    
+    $('projects').insert( new Element('div', proj, id: "project-" + proj)); 
+    
+    
+    new Ajax(proj + '/current.json', onSuccess: function(t){
+      
+      var projects = eval(t.responseText)
+      
+      
+      
+    })
+    
+    
+  })
+  
+})
+
+
+
+
+
+<div id="projects">
+  
+</div>
