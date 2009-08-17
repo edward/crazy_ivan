@@ -1,4 +1,4 @@
-= crazy_ivan
+= Crazy Ivan
 
 Crazy Ivan (CI) is simplest possible continuous integration tool.
 
@@ -28,7 +28,7 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
               version
               run-tests
 
-  * ci first executes `setup` and captures the output:
+  * ci first executes `update` and captures the output:
   
       #!/usr/bin/env bash
       
