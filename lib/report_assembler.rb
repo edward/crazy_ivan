@@ -1,4 +1,6 @@
 class ReportAssembler
+  MAXIMUM_RECENTS = 10
+  
   attr_accessor :tests
   
   def initialize(output_directory)
@@ -23,10 +25,10 @@ class ReportAssembler
       File.open("#{result.version_output}.json", 'w+') do |f|
         f.puts <<-RUBY
         {
-          project: #{result.project_name},
-          version: #{result.version_output},
-          setup: '#{result.update_output}',
-          setup_errorcode: #{result.setup_errorcode},
+          project: '#{result.project_name}',
+          version: '#{result.version_output}',
+          update: '#{result.update_output}',
+          update_errorcode: '#{result.setup_errorcode}',
           test: '#{result.test_output}',
           test_errorcode: '#{result.test_errorcode}'
         }
@@ -38,10 +40,25 @@ class ReportAssembler
   end
   
   def update_recent(result)
-    # WORKING HERE
-    recent_versions = File.open('whatever.json', 'r').read # => 
-    
     recent_versions = eval(File.open('recent.json', File::RDWR|File::CREAT).read)
-    File.open('recent.json', "w+")
+    recent_versions << result.version_output
+    recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
+    
+    File.open('recent.json', "w+") do |f|
+      f.print "[#{recent_versions.map {|v| "'#{v}'"}.join(', ')}]"
+    end
+  end
+  
+  def update_projects
+    projects = @test_results.project_name.map {|n| "'#{n}'"}
+    
+    File.open('projects.json', 'w+') do |f|
+      f.print "[#{projects.join(', ')}]"
+    end
+  end
+  
+  def update_index
+    # WORKING HERE
+    raise "Please implement ReportAssembler#update_index"
   end
 end
