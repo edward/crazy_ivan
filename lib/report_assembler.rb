@@ -1,7 +1,7 @@
 class ReportAssembler
   MAXIMUM_RECENTS = 10
   
-  attr_accessor :tests
+  attr_accessor :test_results
   
   def initialize(output_directory)
     @test_results = []
@@ -9,7 +9,7 @@ class ReportAssembler
   end
   
   def generate
-    Dir.chdir(output_directory) do
+    Dir.chdir(@output_directory) do
       @test_results.each do |result|
         update_project(result)
       end

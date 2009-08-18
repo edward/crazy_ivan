@@ -1,7 +1,42 @@
 #!/usr/bin/env ruby -wKU
 
-require 'lib/crazy_ivan.rb'
+require File.join(File.dirname(__FILE__), *%w[.. lib crazy_ivan])
+require "optparse"
 
-output_directory = ARGV[1]
+CRAZY_IVAN_VERSION = File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION]))
 
-CrazyIvan::generate_reports_in(output_directory)
+def generate_test_reports_in(output_directory)
+  puts `pwd`
+  Dir['*'].each do |dir|
+    report = ReportAssembler.new(output_directory)
+    
+    if File.directory?(dir)
+      report.test_results << TestRunner.new(dir).invoke
+    end
+    
+    report.generate
+  end
+end
+
+options = {}
+
+ARGV.options do |opts|
+  opts.banner = "Usage:  #{File.basename($PROGRAM_NAME)} test_reports_directory"
+  
+  opts.on( "-h", "--help",
+           "Show this message." ) do
+    puts opts
+    exit
+  end
+  
+  begin
+    opts.parse!
+    
+    output_directory = ARGV[0]
+    FileUtils.mkdir_p(output_directory)
+    generate_test_reports_in(output_directory)
+  # rescue
+  #   puts opts
+  #   exit
+  end
+end

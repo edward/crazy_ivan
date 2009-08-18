@@ -2,7 +2,7 @@ require 'open3'
 
 class TestRunner
 
-  class Result < Struct.new(:project_name, :update_output, :test_output, :update_errorcode, :test_errorcode)
+  class Result < Struct.new(:project_name, :update_output, :version_output, :test_output, :update_errorcode, :test_errorcode)
   end
   
   def initialize(dir)
@@ -10,16 +10,25 @@ class TestRunner
   end
 
   def valid?
-    if File.stat(@dir, '.ci', 'update').executable?
-      fail "#{@dir}/.ci directory update script missing or not executable"
+    check_script('update')
+    check_script('version')
+    check_script('run-tests')
+    return true
+  end
+  
+  def check_script(name)
+    script_path = File.join(@dir, '.ci', name)
+    
+    if File.exists?(script_path)
+      if !File.stat(script_path).executable?
+        abort "#{@dir}/.ci/#{name} script not executable"
+      end
+    else
+      abort "#{@dir}/.ci/#{name} script missing"
     end
     
-    if File.stat(@dir, '.ci', 'version').executable?
-      fail "#{@dir}/.ci directory version script missing or not executable"
-    end
-    
-    if File.stat(@dir, '.ci', 'run-tests').executable?
-      fail "#{@dir}/.ci directory run-tests script missing or not executable"
+    if File.open(script_path).read.empty?
+      abort "#{@dir}/.ci/#{name} script empty"
     end
   end
   
@@ -38,9 +47,9 @@ class TestRunner
 
   def invoke
     if valid?
-      Dir.chdir(dir) do
+      Dir.chdir(@dir) do
         
-        project_name = dir.split(File::SEPARATOR).last
+        project_name = @dir.split(File::SEPARATOR).last
         results = Result.new(project_name)
         
         results.version_output = run_script('version')
