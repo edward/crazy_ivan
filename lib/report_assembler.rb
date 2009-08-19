@@ -23,16 +23,16 @@ class ReportAssembler
     FileUtils.mkdir_p(result.project_name)
     Dir.chdir(result.project_name) do
       File.open("#{result.version_output}.json", 'w+') do |f|
-        f.puts <<-RUBY
+        f.puts <<-PROJECT_JSON_RUBY
         {
           project: '#{result.project_name}',
           version: '#{result.version_output}',
           update: '#{result.update_output}',
-          update_errorcode: '#{result.setup_errorcode}',
+          update_error: '#{result.update_error}',
           test: '#{result.test_output}',
-          test_errorcode: '#{result.test_errorcode}'
+          test_error: '#{result.test_error}'
         }
-        RUBY
+        PROJECT_JSON_RUBY
       end
       
       update_recent(result)
@@ -40,7 +40,7 @@ class ReportAssembler
   end
   
   def update_recent(result)
-    recent_versions = eval(File.open('recent.json', File::RDWR|File::CREAT).read)
+    recent_versions = eval(File.open('recent.json', File::RDWR|File::CREAT).read) || []
     recent_versions << result.version_output
     recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
     
@@ -50,7 +50,7 @@ class ReportAssembler
   end
   
   def update_projects
-    projects = @test_results.project_name.map {|n| "'#{n}'"}
+    projects = @test_results.map {|r| "'#{r.project_name}'"}
     
     File.open('projects.json', 'w+') do |f|
       f.print "[#{projects.join(', ')}]"

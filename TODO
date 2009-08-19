@@ -1,0 +1,10 @@
+* When the .ci directory scripts are missing, prompt with a 
+
+    Create update script? [Y]/n?
+  
+  then ask them about the git or svn repository. Do a friendly wizard thing with nice colours.
+  This should be as nice as Phusion’s thing.
+
+* TestRunner#run_script should warn or complain on empty scripts or on scripts that do not return output
+
+* Think about using popen4 instead (fixes exit status code issue with popen3)
