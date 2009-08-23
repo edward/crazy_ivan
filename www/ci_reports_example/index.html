@@ -1,35 +1,120 @@
+<html>
+  <head>
+    <script type="text/javascript" src="../../templates/prototype.js"></script>
+    <script type="text/javascript" src="../../templates/json-template.js"></script>
+    <script type="text/javascript">
+      var init = function() {
+        var json = {
+          "url-base": "http://example.com/music/", 
+          "playlist-name": "Epic Playlist", 
+          "songs": [
+            {
+              "url": "1.mp3", 
+              "artist": "Grayceon", 
+              "title": "Sounds Like Thunder"
+            }, 
+            {
+              "url": "2.mp3", 
+              "artist": "Thou", 
+              "title": "Their Hooves Carve Craters in the Earth"
+            }
+          ]
+        }
+        
+        render('index.jsont', projects());
+      }
 
-
-use http://json-template.googlecode.com/svn/trunk/doc/Introducing-JSON-Template.html
-
-
-
-new Ajax('projects.json', onSuccess: function(t){
-  
-  var projects = eval(t.responseText)
-  
-  projects.each(function(proj) {
-    
-    $('projects').insert( new Element('div', proj, id: "project-" + proj)); 
-    
-    
-    new Ajax(proj + '/current.json', onSuccess: function(t){
+      var projects = function() {
+        var projects = [];
+        var project_names = [];
+        
+        new Ajax.Request('projects.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            project_names = transport.responseText.evalJSON().projects;
+          }
+        });
+        
+        project_names.each(function(project_name) {
+          var reports = []
+          
+          reports = recent_versions(project_name).map(function(version) {
+            return version_test_report(project_name, version)
+          })
+          
+          project = {name: project_name, reports: reports}
+          projects.push(project)
+        })
+        
+        return {"projects": projects};
+      }
       
-      var projects = eval(t.responseText)
+      var recent_versions = function(project) {
+        var recent_versions = []
+        new Ajax.Request(project + '/recent.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            recent_versions = transport.responseText.evalJSON().recent_versions;
+          }
+        });
+        return recent_versions;
+      }
       
+      var version_test_report = function(project, version) {
+        var report = {};
+        url = project + '/' + version + '.json';
+        
+        new Ajax.Request(url, {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            report = transport.responseText.evalJSON();
+          }
+        });
+        return report
+      }
       
+      // update: 'Ok!',
+      // update_error: '',
+      // test: 'Brrnnnnn..... running tests',
+      // test_error: ''
       
-    })
-    
-    
-  })
-  
-})
+      // WORKING HERE
+      // Introducing the json reports in; use {.section update} and such to do conditional output
 
-
-
-
-
-<div id="projects">
-  
-</div>
+      var render = function(template_name, json) {
+        var template = jsontemplate.Template("                                             \
+          {.section projects}                                                              \
+            {.repeated section @}                                                          \
+              <h2>{name}</h2>                                                              \
+              {.section reports}                                                           \
+                <table>                                                                    \
+                  {.repeated section @}                                                    \
+                    <tr>                                                                   \
+                      <td>{version}</td>                                                   \
+                      <td>{update}</td>                                                    \
+                      <td>{update_error}</td>                                              \
+                      <td>{test}</td>                                                      \
+                      <td>{test_error}</td>                                                \
+                    </tr>                                                                  \
+                  {.end}                                                                   \
+                </table>                                                                   \
+              {.or}                                                                        \
+                <p>No test reports found. Please run the `ci` executable.</p>              \
+              {.end}                                                                       \
+            {.end}                                                                         \
+          {.or}                                                                            \
+            <p>No projects found.</p>                                                      \
+          {.end}                                                                           \
+        ")
+        
+        var html = template.expand(json)
+        document.getElementById("replace").innerHTML = html
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <h4>Here is the same example rendered in JavaScript.  <b>View Source</b> to
+    see how it works.</h4>
+    <div id="replace"></div>
+  </body>
+</html>

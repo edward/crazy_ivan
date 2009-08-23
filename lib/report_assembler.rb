@@ -25,7 +25,6 @@ class ReportAssembler
       File.open("#{result.version_output}.json", 'w+') do |f|
         f.puts <<-PROJECT_JSON_RUBY
         {
-          project: '#{result.project_name}',
           version: '#{result.version_output}',
           update: '#{result.update_output}',
           update_error: '#{result.update_error}',

@@ -24,6 +24,17 @@
         render('index.jsont', json);
       }
 
+      var projects = function() {
+        var projects
+        new Ajax.Request('projects', {
+          method:'get',
+          onSuccess: function(transport){
+             var json = transport.responseText.evalJSON();
+           }
+        })
+        return projects
+      }
+
       var render = function(template_name, json) {
         var options = {}
         var template
@@ -31,6 +42,26 @@
           template = jsontemplate.Template(transport.responseText)
         }
         new Ajax.Request(template_name, options)
+        
+        template = jsontemplate.Template("                                                  \
+          {# This is a comment and will be removed from the output.}                        \
+                                                                                            \
+          {.section songs}                                                                  \
+            <h2>Songs in '{playlist-name}'</h2>                                             \
+                                                                                            \
+            <table width=\"100%\">                                                          \
+            {.repeated section @}                                                           \
+              <tr>                                                                          \
+                <td><a href=\"{url-base|htmltag}{url|htmltag}\">Play</a>                    \
+                <td><i>{title}</i></td>                                                     \
+                <td>{artist}</td>                                                           \
+              </tr>                                                                         \
+            {.end}                                                                          \
+            </table>                                                                        \
+          {.or}                                                                             \
+            <p><em>(No page content matches)</em></p>                                       \
+          {.end}
+        ")
         
         var html = template.expand(json)
         document.getElementById("replace").innerHTML = html

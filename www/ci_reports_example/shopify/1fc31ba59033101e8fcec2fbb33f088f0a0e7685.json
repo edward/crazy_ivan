@@ -1,9 +1,7 @@
 {
- project: shopify,
- version: 1fc31ba59033101e8fcec2fbb33f088f0a0e7685, 
- setup: '.....[setup output]......',
- setup_errorcode: 0,
- 
- test: '.....[test run output]......',
- test_errorcode: 0,
+  version: '36a03046f76e989d26a74178f3be9604550ba093',
+  update: 'Ok!',
+  update_error: '',
+  test: 'Brrnnnnn..... running tests',
+  test_error: ''
 }
