@@ -1,56 +1,43 @@
 <html>
   <head>
-    <script type="text/javascript" src="json-template.js">
-    </script>
+    <script type="text/javascript" src="prototype.js"></script>
+    <script type="text/javascript" src="json-template.js"></script>
     <script type="text/javascript">
-    
-    // Note that this requires json-template.js
-    
-    function write() {
-      
-      // Any ideas on how to move this template out to another file
-      // such that I don’t have to do the end-of-line string escaping?
-      
-      var t = jsontemplate.Template(
-       "{# This is a comment and will be removed from the output.}              \
-                                                                                \
-        {.section songs}                                                        \
-          <h2>Songs in '{playlist-name}'</h2>                                   \
-                                                                                \
-          <table width=\"100%\">                                                \
-          {.repeated section @}                                                 \
-            <tr>                                                                \
-              <td><a href=\"{url-base|htmltag}{url|htmltag}\">Play</a>          \
-              <td><i>{title}</i></td>                                           \
-              <td>{artist}</td>                                                 \
-            </tr>                                                               \
-          {.end}                                                                \
-          </table>                                                              \
-        {.or}                                                                   \
-          <p><em>(No page content matches)</em></p>                             \
-        {.end}");
-      
-      var s = t.expand({
-        "url-base": "http://example.com/music/", 
-        "playlist-name": "Epic Playlist", 
-        "songs": [
-          {
-            "url": "1.mp3", 
-            "artist": "Grayceon", 
-            "title": "Sounds Like Thunder"
-          }, 
-          {
-            "url": "2.mp3", 
-            "artist": "Thou", 
-            "title": "Their Hooves Carve Craters in the Earth"
-          }
-        ]
-      });
-      document.getElementById("replace").innerHTML = s;
-    }
+      var init = function() {
+        var json = {
+          "url-base": "http://example.com/music/", 
+          "playlist-name": "Epic Playlist", 
+          "songs": [
+            {
+              "url": "1.mp3", 
+              "artist": "Grayceon", 
+              "title": "Sounds Like Thunder"
+            }, 
+            {
+              "url": "2.mp3", 
+              "artist": "Thou", 
+              "title": "Their Hooves Carve Craters in the Earth"
+            }
+          ]
+        }
+        
+        render('index.jsont', json);
+      }
+
+      var render = function(template_name, json) {
+        var options = {}
+        var template
+        options.onComplete = function(transport) {
+          template = jsontemplate.Template(transport.responseText)
+        }
+        new Ajax.Request(template_name, options)
+        
+        var html = template.expand(json)
+        document.getElementById("replace").innerHTML = html
+      }
     </script>
   </head>
-  <body onload="write();">
+  <body onload="init();">
     <h4>Here is the same example rendered in JavaScript.  <b>View Source</b> to
     see how it works.</h4>
     <div id="replace"></div>
