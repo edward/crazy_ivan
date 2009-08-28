@@ -1,29 +1,15 @@
 <html>
   <head>
-    <script type="text/javascript" src="../../templates/prototype.js"></script>
-    <script type="text/javascript" src="../../templates/json-template.js"></script>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Crazy Ivan: CI straight up.</title>
+    
+    <script type="text/javascript" src="../../templates/javascript/prototype.js"></script>
+    <script type="text/javascript" src="../../templates/javascript/json-template.js"></script>
     <script type="text/javascript">
       var init = function() {
-        var json = {
-          "url-base": "http://example.com/music/", 
-          "playlist-name": "Epic Playlist", 
-          "songs": [
-            {
-              "url": "1.mp3", 
-              "artist": "Grayceon", 
-              "title": "Sounds Like Thunder"
-            }, 
-            {
-              "url": "2.mp3", 
-              "artist": "Thou", 
-              "title": "Their Hooves Carve Craters in the Earth"
-            }
-          ]
-        }
-        
         render('index.jsont', projects());
       }
-
+      
       var projects = function() {
         var projects = [];
         var project_names = [];
@@ -36,21 +22,21 @@
         });
         
         project_names.each(function(project_name) {
-          var reports = []
+          var reports = [];
           
           reports = recent_versions(project_name).map(function(version) {
-            return version_test_report(project_name, version)
+            return version_test_report(project_name, version);
           })
           
-          project = {name: project_name, reports: reports}
-          projects.push(project)
+          project = {name: project_name, reports: reports};
+          projects.push(project);
         })
         
         return {"projects": projects};
       }
       
       var recent_versions = function(project) {
-        var recent_versions = []
+        var recent_versions = [];
         new Ajax.Request(project + '/recent.json', {
           asynchronous: false,
           onSuccess: function(transport) {
@@ -70,17 +56,9 @@
             report = transport.responseText.evalJSON();
           }
         });
-        return report
+        return report;
       }
       
-      // update: 'Ok!',
-      // update_error: '',
-      // test: 'Brrnnnnn..... running tests',
-      // test_error: ''
-      
-      // WORKING HERE
-      // Introducing the json reports in; use {.section update} and such to do conditional output
-
       var render = function(template_name, json) {
         var template = jsontemplate.Template("                                             \
           {.section projects}                                                              \
@@ -105,16 +83,14 @@
           {.or}                                                                            \
             <p>No projects found.</p>                                                      \
           {.end}                                                                           \
-        ")
+        ");
         
-        var html = template.expand(json)
-        document.getElementById("replace").innerHTML = html
+        var html = template.expand(json);
+        $("replace").update(html);
       }
     </script>
   </head>
   <body onload="init();">
-    <h4>Here is the same example rendered in JavaScript.  <b>View Source</b> to
-    see how it works.</h4>
     <div id="replace"></div>
   </body>
 </html>
