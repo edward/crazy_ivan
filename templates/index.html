@@ -1,76 +1,97 @@
 <html>
   <head>
-    <script type="text/javascript" src="prototype.js"></script>
-    <script type="text/javascript" src="json-template.js"></script>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Crazy Ivan: CI straight up.</title>
+    
+    <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
+    <script type="text/javascript" src="javascript/prototype.js"></script>
+    <script type="text/javascript" src="javascript/json-template.js"></script>
     <script type="text/javascript">
       var init = function() {
-        var json = {
-          "url-base": "http://example.com/music/", 
-          "playlist-name": "Epic Playlist", 
-          "songs": [
-            {
-              "url": "1.mp3", 
-              "artist": "Grayceon", 
-              "title": "Sounds Like Thunder"
-            }, 
-            {
-              "url": "2.mp3", 
-              "artist": "Thou", 
-              "title": "Their Hooves Carve Craters in the Earth"
-            }
-          ]
-        }
-        
-        render('index.jsont', json);
+        render('index.jsont', projects());
       }
-
+      
       var projects = function() {
-        var projects
-        new Ajax.Request('projects', {
-          method:'get',
-          onSuccess: function(transport){
-             var json = transport.responseText.evalJSON();
-           }
+        var projects = [];
+        var project_names = [];
+        
+        new Ajax.Request('projects.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            project_names = transport.responseText.evalJSON().projects;
+          }
+        });
+        
+        project_names.each(function(project_name) {
+          var reports = [];
+          
+          reports = recent_versions(project_name).map(function(version) {
+            return version_test_report(project_name, version);
+          })
+          
+          project = {name: project_name, reports: reports};
+          projects.push(project);
         })
-        return projects
+        
+        return {"projects": projects};
       }
-
+      
+      var recent_versions = function(project) {
+        var recent_versions = [];
+        new Ajax.Request(project + '/recent.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            recent_versions = transport.responseText.evalJSON().recent_versions;
+          }
+        });
+        return recent_versions;
+      }
+      
+      var version_test_report = function(project, version) {
+        var report = {};
+        url = project + '/' + version + '.json';
+        
+        new Ajax.Request(url, {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            report = transport.responseText.evalJSON();
+          }
+        });
+        return report;
+      }
+      
       var render = function(template_name, json) {
-        var options = {}
-        var template
-        options.onComplete = function(transport) {
-          template = jsontemplate.Template(transport.responseText)
-        }
-        new Ajax.Request(template_name, options)
+        var template = jsontemplate.Template("                                             \
+          {.section projects}                                                              \
+            {.repeated section @}                                                          \
+              <h2>{name}</h2>                                                              \
+              {.section reports}                                                           \
+                <table>                                                                    \
+                  {.repeated section @}                                                    \
+                    <tr>                                                                   \
+                      <td>{version}</td>                                                   \
+                      <td>{update}</td>                                                    \
+                      <td>{update_error}</td>                                              \
+                      <td>{test}</td>                                                      \
+                      <td>{test_error}</td>                                                \
+                    </tr>                                                                  \
+                  {.end}                                                                   \
+                </table>                                                                   \
+              {.or}                                                                        \
+                <p>No test reports found. Please run the `ci` executable.</p>              \
+              {.end}                                                                       \
+            {.end}                                                                         \
+          {.or}                                                                            \
+            <p>No projects found.</p>                                                      \
+          {.end}                                                                           \
+        ");
         
-        template = jsontemplate.Template("                                                  \
-          {# This is a comment and will be removed from the output.}                        \
-                                                                                            \
-          {.section songs}                                                                  \
-            <h2>Songs in '{playlist-name}'</h2>                                             \
-                                                                                            \
-            <table width=\"100%\">                                                          \
-            {.repeated section @}                                                           \
-              <tr>                                                                          \
-                <td><a href=\"{url-base|htmltag}{url|htmltag}\">Play</a>                    \
-                <td><i>{title}</i></td>                                                     \
-                <td>{artist}</td>                                                           \
-              </tr>                                                                         \
-            {.end}                                                                          \
-            </table>                                                                        \
-          {.or}                                                                             \
-            <p><em>(No page content matches)</em></p>                                       \
-          {.end}
-        ")
-        
-        var html = template.expand(json)
-        document.getElementById("replace").innerHTML = html
+        var html = template.expand(json);
+        $("replace").update(html);
       }
     </script>
   </head>
   <body onload="init();">
-    <h4>Here is the same example rendered in JavaScript.  <b>View Source</b> to
-    see how it works.</h4>
     <div id="replace"></div>
   </body>
 </html>

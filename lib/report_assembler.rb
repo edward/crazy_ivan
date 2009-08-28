@@ -1,5 +1,7 @@
 class ReportAssembler
   MAXIMUM_RECENTS = 10
+  ROOT_PATH = File.expand_path(File.dirname(__FILE__))
+  TEMPLATES_PATH = File.join(ROOT_PATH, *%w[.. templates])
   
   attr_accessor :test_results
   
@@ -39,12 +41,16 @@ class ReportAssembler
   end
   
   def update_recent(result)
-    recent_versions = eval(File.open('recent.json', File::RDWR|File::CREAT).read) || []
+    recent_versions_content = File.open('recent.json', File::RDWR|File::CREAT).read
+    # WORKING HERE
+    raise WorkingHere, "Add a JSON parser or cobble one together to make this last line work, then test the project"
+    recent_versions = JSON::parse(recent_versions_content)["recent_versions"] || []
+    
     recent_versions << result.version_output
     recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
     
-    File.open('recent.json', "w+") do |f|
-      f.print "[#{recent_versions.map {|v| "'#{v}'"}.join(', ')}]"
+    File.open('recent.json', 'w+') do |f|
+      f.print "{\"recent_versions\": [#{recent_versions.map {|v| "'#{v}'"}.join(', ')}]}"
     end
   end
   
@@ -52,12 +58,15 @@ class ReportAssembler
     projects = @test_results.map {|r| "'#{r.project_name}'"}
     
     File.open('projects.json', 'w+') do |f|
-      f.print "[#{projects.join(', ')}]"
+      f.print "{\"projects\": [#{projects.join(', ')}]}"
     end
   end
   
   def update_index
-    # WORKING HERE
-    raise "Please implement ReportAssembler#update_index"
+    index_template = HtmlAssetCrush.crush(File.join(TEMPLATES_PATH, "index.html"))
+    
+    File.open('index.html', 'w+') do |f|
+      f.print index_template
+    end
   end
 end
