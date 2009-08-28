@@ -1,8 +1,0 @@
-        {
-          project: 'example_project',
-          version: '36a03046f76e989d26a74178f3be9604550ba093',
-          update: 'Ok!',
-          update_error: '',
-          test: 'Brrnnnnn..... running tests',
-          test_error: ''
-        }
