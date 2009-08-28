@@ -6,7 +6,6 @@ require "optparse"
 CRAZY_IVAN_VERSION = File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION]))
 
 def generate_test_reports_in(output_directory)
-  puts `pwd`
   Dir['*'].each do |dir|
     report = ReportAssembler.new(output_directory)
     

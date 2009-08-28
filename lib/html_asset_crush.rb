@@ -28,11 +28,6 @@ module HtmlAssetCrush
   end
   
   def self.crush(html_filepath)
-    
-    puts "Current working directory: #{`pwd`}"
-    puts "Templates should be in #{html_filepath}"
-    
-    
     Dir.chdir(File.dirname(html_filepath)) do
       html = File.open(html_filepath).read
       crushed_html = ""    
