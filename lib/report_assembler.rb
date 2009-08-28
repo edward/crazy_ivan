@@ -41,21 +41,19 @@ class ReportAssembler
   end
   
   def update_recent(result)
-    recent_versions_content = File.open('recent.json', File::RDWR|File::CREAT).read
-    # WORKING HERE
-    raise WorkingHere, "Add a JSON parser or cobble one together to make this last line work, then test the project"
-    recent_versions = JSON::parse(recent_versions_content)["recent_versions"] || []
+    recent_versions_json = File.open('recent.json', File::RDWR|File::CREAT).read
+    recent_versions = YAML.load(recent_versions_json)["recent_versions"] || []
     
     recent_versions << result.version_output
     recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
     
     File.open('recent.json', 'w+') do |f|
-      f.print "{\"recent_versions\": [#{recent_versions.map {|v| "'#{v}'"}.join(', ')}]}"
+      f.print "{\"recent_versions\": [#{recent_versions.map {|v| "\"#{v}\""}.join(', ')}]}"
     end
   end
   
   def update_projects
-    projects = @test_results.map {|r| "'#{r.project_name}'"}
+    projects = @test_results.map {|r| "\"#{r.project_name}\""}
     
     File.open('projects.json', 'w+') do |f|
       f.print "{\"projects\": [#{projects.join(', ')}]}"
