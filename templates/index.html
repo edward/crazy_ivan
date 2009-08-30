@@ -67,6 +67,13 @@
               <h2>{name}</h2>                                                              \
               {.section reports}                                                           \
                 <table>                                                                    \
+                  <tr>                                                                     \
+                    <th>Version</th>                                                       \
+                    <th>Update Result</th>                                                 \
+                    <th>Update Errors</th>                                                 \
+                    <th>Test Result</th>                                                   \
+                    <th>Test Errors</th>                                                   \
+                  </tr>                                                                    \
                   {.repeated section @}                                                    \
                     <tr>                                                                   \
                       <td>{version}</td>                                                   \

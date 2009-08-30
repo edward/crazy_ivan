@@ -5,3 +5,7 @@ body {
   color: #333;
   font: 100%/1.5 Calibri, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
+td {
+  vertical-align: top;
+}
