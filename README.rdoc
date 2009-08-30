@@ -4,14 +4,28 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
 
 == Usage
 
-  $ ci setup  # creates the ci directory,
-              # drops a configuration file,
-              # sets a cron job to run ci
+  Create a directory where your projects will live
+    $ mkdir /var/continuous-integration
+  
+  Setup a project or two in that directory
+    $ cd /var/continuous-integration
+    $ git clone git://github.com/edward/active_merchant.git
+  
+  Setup continuous-integration for each project
+    $ cd active_merchant
+    
+    $ crazy_ivan setup  # creates the ci directory,
+                        # creates a configuration file,
+                        # sets a cron job to run ci
+  
+  Manually run it once to check everything is ok
+    $ cd /var/continuous-integration
+    $ crazy_ivan
 
 == How this works
 
-  * ci (the script) is executed periodically by cron
-  * ci looks in directories one level deeper than where it’s been called
+  * crazy_ivan is executed periodically by cron
+  * crazy_ivan looks in directories one level deeper than where it’s been called
   
     => asked to run in /projects
                          /shopify
@@ -23,12 +37,12 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
        two executable scripts:
        
           /shopify
-            /ci
-              setup
+            /crazy_ivan
+              update
               version
-              run-tests
+              test
 
-  * ci first executes `update` and captures the output:
+  * crazy_ivan first executes `update` and captures the output:
   
       #!/usr/bin/env bash
       
@@ -37,7 +51,7 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
                 # needs to do to update your
                 # source from a repository
   
-  * ci then exectutes `version` and captures the output:
+  * crazy_ivan then exectutes `version` and captures the output:
   
       #!/usr/bin/env bash
       
@@ -45,7 +59,7 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
       git show  # Get a version hash/fingerprint/id from
                 # your version control system
   
-  * ci then executes `run-tests` and captures the output:
+  * crazy_ivan then executes `run-tests` and captures the output:
       
       #!/usr/bin/env bash
       

@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby -wKU
+
+require File.join(File.dirname(__FILE__), *%w[.. lib crazy_ivan])
+require "optparse"
+require "logger"
+
+CRAZY_IVAN_VERSION = File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION]))
+
+def setup
+  
+  Dir['*'].each do |dir|
+    Dir.chdir(dir) do
+      FileUtils.mkdir_p('.ci')
+
+      Dir.chdir('.ci') do
+        File.open('update', 'w+') do |f|
+          f.puts "#!/usr/bin/env bash"
+          f.puts "git pull"
+        end
+      
+        File.open('version', 'w+') do |f|
+          f.puts "#!/usr/bin/env ruby -wKU"
+          f.puts "puts `git show`[/^commit (.+)$/, 1]"
+        end
+      
+        File.open('test', 'w+') do |f|
+          f.puts "#!/usr/bin/env bash"
+          f.puts "rake"
+        end
+        
+        File.chmod 0755, 'update', 'version', 'test'
+      end
+      
+      puts
+      puts "Created #{dir}/.ci/update"
+      puts "        #{' ' * (dir + "/.ci").size}/version"
+      puts "        #{' ' * (dir + "/.ci").size}/test"
+      puts
+      puts "Take a look at those 3 scripts to make sure "
+      puts "they do the right thing for each case."
+      puts
+    end
+  end
+end
+
+def generate_test_reports_in(output_directory)
+  Dir['*'].each do |dir|
+    if File.directory?(dir)
+      report = ReportAssembler.new(output_directory)
+      report.test_results << TestRunner.new(dir).invoke
+      report.generate
+    end
+  end
+end
+
+options = {}
+
+ARGV.options do |opts|
+  opts.banner = "Usage:  #{File.basename($PROGRAM_NAME)} test_reports_path"
+  
+  opts.on_tail("-h", "--help", "Show this message") do
+    puts opts
+    exit
+  end
+
+  opts.on_tail("--version", "Show version") do
+    puts CRAZY_IVAN_VERSION
+    exit
+  end
+  
+  begin
+    opts.parse!
+    
+    case ARGV[0]
+    when /setup/
+      setup
+    else
+      output_directory = ARGV[0]
+      FileUtils.mkdir_p(output_directory)
+      generate_test_reports_in(output_directory)
+    end
+    
+  # rescue
+  #   puts opts
+  #   exit
+  end
+end

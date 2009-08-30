@@ -8,3 +8,20 @@
 * TestRunner#run_script should warn or complain on empty scripts or on scripts that do not return output
 
 * Think about using popen4 instead (fixes exit status code issue with popen3)
+
+* What about making all setup just be:
+
+  $ ci install [/var/continuous-integration]
+  # Defaults to creating ^^^ and prompting for each project somehow
+
+* Needs more logging; should log to system when running each project
+
+* Add a 'periscope' web-hook with rack to run tests.
+
+* Come up with a better executable name ("ci" is taken by RCS)
+
+* Come up with a better way of making the scripts executable other than just chmod-755-ing them.
+
+* Come up with a better way of dealing with the filename length issue. (Having to truncate at 240 chars right now.)
+
+* Create example script templates for popular version control systems
