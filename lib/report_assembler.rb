@@ -21,19 +21,21 @@ class ReportAssembler
     end
   end
   
+  def version(string)
+    string[0..240]
+  end
+  
   def update_project(result)
     FileUtils.mkdir_p(result.project_name)
     Dir.chdir(result.project_name) do
-      File.open("#{result.version_output}.json", 'w+') do |f|
-        f.puts <<-PROJECT_JSON_RUBY
-        {
-          version: '#{result.version_output}',
-          update: '#{result.update_output}',
-          update_error: '#{result.update_error}',
-          test: '#{result.test_output}',
-          test_error: '#{result.test_error}'
-        }
-        PROJECT_JSON_RUBY
+      File.open("#{version(result.version_output)}.json", 'w+') do |f|
+        f.puts({
+                 "version" => result.version_output,
+                 "update" => result.update_output,
+                 "update_error" => result.update_error,
+                 "test" => result.test_output,
+                 "test_error" => result.test_error
+               }.to_json)
       end
       
       update_recent(result)
@@ -42,9 +44,14 @@ class ReportAssembler
   
   def update_recent(result)
     recent_versions_json = File.open('recent.json', File::RDWR|File::CREAT).read
-    recent_versions = YAML.load(recent_versions_json)["recent_versions"] || []
     
-    recent_versions << result.version_output
+    recent_versions = []
+    
+    if !recent_versions_json.empty?
+      recent_versions = JSON.parse(recent_versions_json)["recent_versions"]
+    end
+    
+    recent_versions << version(result.version_output)
     recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
     
     File.open('recent.json', 'w+') do |f|

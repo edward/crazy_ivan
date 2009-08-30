@@ -14,7 +14,7 @@ spec = Gem::Specification.new do |spec|
   spec.author = 'Edward Ocampo-Gooding'
   spec.email = 'edward@edwardog.net'
   spec.homepage = 'http://github.com/edward/crazy_ivan/tree/master'
-  spec.files = Dir['bin/crazy_ivan', 'lib/*.rb', 'templates/**/*', 'README.rdoc', 'LICENSE', 'Rakefile', 'TODO', 'VERSION']
+  spec.files = Dir['bin/crazy_ivan', 'lib/*.rb', 'templates/**/*', 'README.rdoc', 'LICENSE', 'Rakefile', 'TODO', 'VERSION', 'vendor/**/*']
   spec.executables = ['crazy_ivan']
   spec.version = '0.1.0'
 end

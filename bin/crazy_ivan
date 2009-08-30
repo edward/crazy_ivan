@@ -1,13 +1,13 @@
 #!/usr/bin/env ruby -wKU
 
 require File.join(File.dirname(__FILE__), *%w[.. lib crazy_ivan])
+require File.join(File.dirname(__FILE__), *%w[.. vendor json-1.1.7 lib json])
 require "optparse"
 require "logger"
 
 CRAZY_IVAN_VERSION = File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION]))
 
 def setup
-  
   Dir['*'].each do |dir|
     Dir.chdir(dir) do
       FileUtils.mkdir_p('.ci')
@@ -74,14 +74,13 @@ ARGV.options do |opts|
     case ARGV[0]
     when /setup/
       setup
-    else
+    when /\w+/
       output_directory = ARGV[0]
       FileUtils.mkdir_p(output_directory)
       generate_test_reports_in(output_directory)
+    else
+      puts opts
+      exit
     end
-    
-  # rescue
-  #   puts opts
-  #   exit
   end
 end
