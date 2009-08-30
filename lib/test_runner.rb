@@ -2,7 +2,7 @@ require 'open3'
 
 class TestRunner
 
-  class Result < Struct.new(:project_name, :update_output, :version_output, :test_output, :update_error, :test_error)
+  class Result < Struct.new(:project_name, :update_output, :version_output, :test_output, :update_error, :test_error, :timestamp)
   end
   
   def initialize(project_path)
@@ -62,6 +62,8 @@ class TestRunner
       if results.update_error.empty?
         results.test_output, results.test_error = run_script('test')
       end
+      
+      results.timestamp = Time.now
       
       return results
     end

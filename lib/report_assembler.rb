@@ -31,6 +31,7 @@ class ReportAssembler
       File.open("#{version(result.version_output)}.json", 'w+') do |f|
         f.puts({
                  "version" => result.version_output,
+                 "timestamp" => result.timestamp,
                  "update" => result.update_output,
                  "update_error" => result.update_error,
                  "test" => result.test_output,
