@@ -57,8 +57,10 @@ def show_howto
   puts "Hankering for a continuous integration server, eh?"
   puts
   puts "1. Jump over to where you want to keep your projects"
-  puts "   (like /var/continuous-integration), and git clone or svn checkout"
-  puts "   or whatever-them down."
+  puts "   and git clone or svn checkout or whatever-them down:"
+  puts "     $ mkdir -p /var/continuous-integration/projects/"
+  puts "     $ cd /var/continuous-integration/projects"
+  puts "     $ git clone git@github.com:edward/active_merchant.git"
   puts
   puts "2. Run:"
   puts "     $ crazy_ivan setup"
