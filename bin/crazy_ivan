@@ -53,12 +53,38 @@ def generate_test_reports_in(output_directory)
   end
 end
 
+def show_howto
+  puts "Hankering for a continuous integration server, eh?"
+  puts
+  puts "1. Jump over to where you want to keep your projects"
+  puts "   (like /var/continuous-integration), and git clone or svn checkout"
+  puts "   or whatever-them down."
+  puts
+  puts "2. Run:"
+  puts "     $ crazy_ivan setup"
+  puts
+  puts "3. Run it manually to check that everything is ok:"
+  puts "     $ crazy_ivan /var/www/ci"
+  puts
+  puts "   (/var/www/ci should be accessible through your web server)"
+  puts "   Check /var/www/ci/index.html through a web browser."
+  puts
+  puts "4. Set up cron to run it every 15 minutes:"
+  puts "     $ echo \"0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci\" > ci.cron"
+  puts "     $ crontab ci.cron"
+  puts
+  puts "5. Profit."
+  puts
+  puts "Please see http://github.com/edward/crazy_ivan for more."
+end
+
 options = {}
 
 ARGV.options do |opts|
   opts.banner = "Usage:  #{File.basename($PROGRAM_NAME)} test_reports_path"
   
   opts.on_tail("-h", "--help", "Show this message") do
+    show_howto
     puts opts
     exit
   end
@@ -79,7 +105,7 @@ ARGV.options do |opts|
       FileUtils.mkdir_p(output_directory)
       generate_test_reports_in(output_directory)
     else
-      puts opts
+      show_howto
       exit
     end
   end
