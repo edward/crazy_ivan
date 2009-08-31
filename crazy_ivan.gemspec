@@ -29,6 +29,7 @@ Gem::Specification.new do |s|
     ".gitignore",
      "LICENSE",
      "README.rdoc",
+     "Rakefile",
      "TODO",
      "VERSION",
      "bin/crazy_ivan",
