@@ -29,3 +29,5 @@
 * Add functionality to detect new test runs and update index.html in-browser (have a poll every 30 seconds or something on projects.json and recents.json)
 
 * Use datejs to parse the timestamp to easily produce deltas (i.e. "Last test ran 2 days ago")
+
+* Do something like use a file-lock to prevent overlapping runs and notify in the index.html that it's happening

@@ -16,5 +16,5 @@ spec = Gem::Specification.new do |spec|
   spec.homepage = 'http://github.com/edward/crazy_ivan/tree/master'
   spec.files = Dir['bin/crazy_ivan', 'lib/*.rb', 'templates/**/*', 'README.rdoc', 'LICENSE', 'Rakefile', 'TODO', 'VERSION', 'vendor/**/*']
   spec.executables = ['crazy_ivan']
-  spec.version = '0.1.0'
+  spec.version = '0.2.0'
 end

@@ -12,15 +12,30 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
     $ git clone git://github.com/edward/active_merchant.git
   
   Setup continuous-integration for each project
-    $ cd active_merchant
+    $ crazy_ivan setup  # creates example ci scripts in 
+                        # each project (see How this works)
     
-    $ crazy_ivan setup  # creates the ci directory,
+  
+  
+    $ crazy_ivan setup  # creates the ci directory, and
                         # creates a configuration file,
-                        # sets a cron job to run ci
+                        # sets a cron job to run crazy_ivan
   
   Manually run it once to check everything is ok
     $ cd /var/continuous-integration
-    $ crazy_ivan
+    $ crazy_ivan /var/www/ci       # the test reports path should be
+                                   # accessible via your web server
+    
+    $ open /var/www/ci/index.html  # or check it through your browser
+  
+  Set a cron job to run it every 15 minutes
+    $ echo "0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci" > ci.cron
+    $ crontab ci.cron
+  
+  Note that you don’t want this running too frequently; having overlapping 
+  runs is possible and would be bad.
+  
+  (Functionality to have this run as a web-hook is planned.)
 
 == How this works
 
@@ -33,11 +48,11 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
         of these dirs    /active_merchant
              ========>   /active_shipping
 
-    => within each directory, it expects
-       two executable scripts:
+    => within each directory, it expects three executable scripts
+       to execute at the /:
        
           /shopify
-            /crazy_ivan
+            /.ci
               update
               version
               test
@@ -46,7 +61,6 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
   
       #!/usr/bin/env bash
       
-      cd ..
       git pull  # Whatever your application
                 # needs to do to update your
                 # source from a repository
@@ -55,15 +69,16 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
   
       #!/usr/bin/env bash
       
-      cd ..
-      git show  # Get a version hash/fingerprint/id from
-                # your version control system
+      #!/usr/bin/env ruby -wKU             # Get a version hash/fingerprint/id
+      puts `git show`[/^commit (.+)$/, 1]  # from your version control system
+                                           #
+                                           # (Note that this will be truncated
+                                           #  to fit within a filename length.)
   
-  * crazy_ivan then executes `run-tests` and captures the output:
+  * crazy_ivan then executes `test` and captures the output:
       
       #!/usr/bin/env bash
       
-      cd ..
       rake db:migrate    # This task prepares the application
       rake test          # for running tests, then runs them
 
@@ -72,8 +87,8 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
     the static html.
 
 
-== Credits and Copyright
-
-Heavily inspired/first code sketch written by Tobi Lütke.
+== Copyright and Credits
 
 Copyright (c) 2009 Edward Ocampo-Gooding. See LICENSE for details.
+
+Heavily inspired/first code sketch written by Tobi Lütke.
