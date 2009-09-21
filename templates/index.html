@@ -68,20 +68,27 @@
               {.section reports}                                                           \
                 <table>                                                                    \
                   <tr>                                                                     \
+                    <th>Timestamp</th>                                                     \
                     <th>Version</th>                                                       \
                     <th>Update Result</th>                                                 \
-                    <th>Update Errors</th>                                                 \
                     <th>Test Result</th>                                                   \
-                    <th>Test Errors</th>                                                   \
                   </tr>                                                                    \
                   {.repeated section @}                                                    \
                     <tr>                                                                   \
-                      <td>{timestamp}</td>                                                 \
-                      <td>{version}</td>                                                   \
-                      <td>{update}</td>                                                    \
-                      <td>{update_error}</td>                                              \
-                      <td>{test}</td>                                                      \
-                      <td>{test_error}</td>                                                \
+                      <td class='timestamp'>{timestamp}</td>                               \
+                      <td class='version'>{version}</td>                                   \
+                      <td class='update'>                                                  \
+                        <pre>{update}</pre>                                                \
+                        {.section update_error}                                            \
+                          <div class='error'><pre>{update_error}<pre></div>                \
+                        {.end}                                                             \
+                      </td>                                                                \
+                      <td class='test'>                                                    \
+                        <pre>{test}</pre>                                                  \
+                        {.section test_error}                                              \
+                          <div class='error'><pre>{test_error}<pre></div>                  \
+                        {.end}                                                             \
+                      </td>                                                                \
                     </tr>                                                                  \
                   {.end}                                                                   \
                 </table>                                                                   \
