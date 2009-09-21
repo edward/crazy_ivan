@@ -8,4 +8,9 @@ body {
 
 td {
   vertical-align: top;
+  font-size: 75%;
+}
+
+.error {
+  color: red;
 }

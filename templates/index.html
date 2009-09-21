@@ -1,3 +1,5 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
 <html>
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
@@ -60,42 +62,52 @@
         return report;
       }
       
+      var expand = function(element) {
+        element.siblings().invoke('show');
+        element.remove();
+      }
+      
       var render = function(template_name, json) {
         var template = jsontemplate.Template("                                             \
           {.section projects}                                                              \
             {.repeated section @}                                                          \
-              <h2>{name}</h2>                                                              \
-              {.section reports}                                                           \
-                <table>                                                                    \
-                  <tr>                                                                     \
-                    <th>Timestamp</th>                                                     \
-                    <th>Version</th>                                                       \
-                    <th>Update Result</th>                                                 \
-                    <th>Test Result</th>                                                   \
-                  </tr>                                                                    \
-                  {.repeated section @}                                                    \
+              <div class='project'>                                                        \
+                <h2>{name}</h2>                                                            \
+                {.section reports}                                                         \
+                  <table class='reports'>                                                  \
                     <tr>                                                                   \
-                      <td class='timestamp'>{timestamp}</td>                               \
-                      <td class='version'>{version}</td>                                   \
-                      <td class='update'>                                                  \
-                        <pre>{update}</pre>                                                \
-                        {.section update_error}                                            \
-                          <div class='error'><pre>{update_error}<pre></div>                \
-                        {.end}                                                             \
-                      </td>                                                                \
-                      <td class='test'>                                                    \
-                        <pre>{test}</pre>                                                  \
-                        {.section test_error}                                              \
-                          <div class='error'><pre>{test_error}<pre></div>                  \
-                        {.end}                                                             \
-                      </td>                                                                \
+                      <th class='timestamp'>Timestamp</th>                                 \
+                      <th class='version'>Version</th>                                     \
+                      <th class='update'>Update Result</th>                                \
+                      <th class='test'>Test Result</th>                                    \
                     </tr>                                                                  \
-                  {.end}                                                                   \
-                </table>                                                                   \
-              {.or}                                                                        \
-                <p>No test reports found. Please run the `ci` executable.</p>              \
+                    {.repeated section @}                                                  \
+                      <tr>                                                                 \
+                        <td class='timestamp'>{timestamp}</td>                             \
+                        <td class='version'>{version}</td>                                 \
+                        <td class='update'>                                                \
+                          <pre>{update}</pre>                                              \
+                          {.section update_error}                                          \
+                            <div class='error'><pre>{update_error}<pre></div>              \
+                          {.end}                                                           \
+                        </td>                                                              \
+                        <td class='test'>                                                  \
+                          <pre>{test}</pre>                                                \
+                          {.section test_error}                                            \
+                            <a href='#' onclick='expand(this)'>Click to see error</a>      \
+                            <div class='error' style='display: hidden'>                    \
+                              <pre>{test_error}<pre>                                       \
+                            </div>                                                         \
+                          {.end}                                                           \
+                        </td>                                                              \
+                      </tr>                                                                \
+                    {.end}                                                                 \
+                  </table>                                                                 \
+                {.or}                                                                      \
+                  <p>No test reports found. Please run the `ci` executable.</p>            \
+                {.end}                                                                     \
               {.end}                                                                       \
-            {.end}                                                                         \
+            </div>                                                                         \
           {.or}                                                                            \
             <p>No projects found.</p>                                                      \
           {.end}                                                                           \
@@ -103,6 +115,21 @@
         
         var html = template.expand(json);
         $("replace").update(html);
+        
+        // Hide all errors by default
+        $$('.error').invoke('hide');
+        
+        $$('.project').each(function(project) {
+          var firstResultsError = project.down('td.test').down('.error')
+          
+          // When the latest test result has an error (i.e. the project is broken)
+          if(firstResultsError) {
+            project.down('h2').addClassName('error');
+            
+            firstResultsError.show();
+            firstResultsError.adjacent('a')[0].onclick();
+          }
+        });
       }
     </script>
   </head>
