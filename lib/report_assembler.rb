@@ -21,14 +21,21 @@ class ReportAssembler
     end
   end
   
-  def version(string)
-    string[0..240]
+  def filename_from_version(string)
+    s = string[0..240]
+    
+    if Dir["#{s}*.json"].size > 0
+      s += "-#{Dir["#{s}*.json"].size}"
+    end
+    
+    s
   end
   
   def update_project(result)
     FileUtils.mkdir_p(result.project_name)
     Dir.chdir(result.project_name) do
-      File.open("#{version(result.version_output)}.json", 'w+') do |f|
+      filename = filename_from_version(result.version_output)
+      File.open("#{filename}.json", 'w+') do |f|
         f.puts({
                  "version" => result.version_output,
                  "timestamp" => result.timestamp,
@@ -39,11 +46,11 @@ class ReportAssembler
                }.to_json)
       end
       
-      update_recent(result)
+      update_recent(result, filename)
     end
   end
   
-  def update_recent(result)
+  def update_recent(result, filename)
     recent_versions_json = File.open('recent.json', File::RDWR|File::CREAT).read
     
     recent_versions = []
@@ -52,19 +59,19 @@ class ReportAssembler
       recent_versions = JSON.parse(recent_versions_json)["recent_versions"]
     end
     
-    recent_versions << version(result.version_output)
+    recent_versions << filename
     recent_versions.shift if recent_versions.size > MAXIMUM_RECENTS
     
     File.open('recent.json', 'w+') do |f|
-      f.print "{\"recent_versions\": [#{recent_versions.map {|v| "\"#{v}\""}.join(', ')}]}"
+      f.print({"recent_versions" => recent_versions}.to_json)
     end
   end
   
   def update_projects
-    projects = @test_results.map {|r| "\"#{r.project_name}\""}
+    projects = @test_results.map {|r| "#{r.project_name}"}
     
     File.open('projects.json', 'w+') do |f|
-      f.print "{\"projects\": [#{projects.join(', ')}]}"
+      f.print({"projects" => projects}.to_json)
     end
   end
   
