@@ -69,73 +69,14 @@
       }
       
       var render = function(template_name, json) {
-        var template = jsontemplate.Template("                                             \
-          <h1>Projects</h1>                                                                \
-          <div class='projects'>                                                                    \
-            {.section projects}                                                                     \
-              {.repeated section @}                                                                 \
-                <div class='project'>                                                               \
-                  <h2>{name}</h2>                                                                   \
-                  <div class='tests'>                                                               \
-                    {.section reports}                                                              \
-                      {.repeated section @}                                                         \
-                        <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href=''>{timestamp}</a>  \
-                      {.end}                                                                        \
-                    {.end}                                                                          \
-                  </div>                                                                            \
-                  <div class='results'>                                                             \
-                    {.section reports}                                                              \
-                      {.repeated section @}                                                         \
-                        <div class='result'>                                                        \
-                          <div>                                                                     \
-                            <span class='timestamp'>{timestamp}</span>                              \
-                            <span class='version'>{version}</span>                                  \
-                          </div>                                                                    \
-                                                                                                    \
-                          <div class='update'>                                                                     \
-                            <pre>{update}</pre>                                      \
-                            {.section update_error}                                                 \
-                              <pre class='error'>{update_error}</pre>                         \
-                            {.end}                                                                  \
-                          </div>                                                                    \
-                                                                                                    \
-                          <div class='test'>                                                        \
-                            <pre>{test}</pre>                                                       \
-                            {.section test_error}                                                   \
-                              <pre class='error'>{test_error}</pre>                                               \
-                            {.end}                                                                  \
-                          </div>                                                                    \
-                        </div>                                                                      \
-                      {.end}                                                                        \
-                    {.or}                                                                           \
-                      <p>No test reports found. Please run the `ci` executable.</p>                 \
-                    {.end}                                                                          \
-                  </div>                                                                            \
-                </div>                                                                              \
-              {.end}                                                                                \
-            {.or}                                                                                   \
-              <p>No projects found.</p>                                                             \
-            {.end}                                                                                  \
-          </div>                                                                                    \
-        ");
-        
-        var html = template.expand(json);
-        $("replace").update(html);
-        
-        // // Hide all errors by default
-        // $$('.error').invoke('hide');
-        // 
-        // $$('.project').each(function(project) {
-        //   var firstResultsError = project.down('td.test').down('.error')
-        //   
-        //   // When the latest test result has an error (i.e. the project is broken)
-        //   if(firstResultsError) {
-        //     project.down('h2').addClassName('error');
-        //     
-        //     firstResultsError.show();
-        //     firstResultsError.adjacent('a')[0].onclick();
-        //   }
-        // });
+        var options = {}
+        options.onComplete = function(transport)
+        {
+          var template = jsontemplate.Template(transport.responseText)
+          var html = template.expand(json);
+          $("replace").update(html);
+        }
+        new Ajax.Request(template_name, options)
       }
     </script>
   </head>
