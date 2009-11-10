@@ -1,0 +1,216 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+  "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Crazy Ivan: CI straight up.</title>
+    
+    <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
+    <script type="text/javascript" src="javascript/prototype.js"></script>
+    <script type="text/javascript" src="javascript/scriptaculous.js"></script>
+    <script type="text/javascript" src="javascript/json-template.js"></script>
+    <script type="text/javascript">
+      var init = function() {
+        render('index.jsont', projects());
+      }
+      
+      var projects = function() {
+        var projects = [];
+        var project_names = [];
+        
+        new Ajax.Request('projects.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            project_names = transport.responseText.evalJSON().projects;
+          }
+        });
+        
+        project_names.each(function(project_name) {
+          var reports = [];
+          
+          reports = recent_versions(project_name).map(function(version) {
+            return version_test_report(project_name, version);
+          })
+          
+          project = {name: project_name, reports: reports};
+          projects.push(project);
+        })
+        
+        return {"projects": projects};
+      }
+      
+      var recent_versions = function(project) {
+        var recent_versions = [];
+        new Ajax.Request(project + '/recent.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            recent_versions = transport.responseText.evalJSON().recent_versions;
+          }
+        });
+        return recent_versions;
+      }
+      
+      var version_test_report = function(project, version) {
+        var report = {};
+        url = project + '/' + version + '.json';
+        
+        new Ajax.Request(url, {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            report = transport.responseText.evalJSON();
+          }
+        });
+        return report;
+      }
+      
+      var expand = function(element) {
+        element.siblings().invoke('show');
+        element.remove();
+      }
+      
+      var render = function(template_name, json) {
+        var template = jsontemplate.Template("                                             \
+          <h1>Projects</h1>                                                                \
+          <div class='projects'>                                                                    \
+            {.section projects}                                                                     \
+              {.repeated section @}                                                                 \
+                <div class='project'>                                                               \
+                  <h2>{name}</h2>                                                                   \
+                  <div class='tests'>                                                               \
+                    {.section reports}                                                              \
+                      {.repeated section @}                                                         \
+                        <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href=''>{timestamp}</a>  \
+                      {.end}                                                                        \
+                    {.end}                                                                          \
+                  </div>                                                                            \
+                  <div class='results'>                                                             \
+                    {.section reports}                                                              \
+                      {.repeated section @}                                                         \
+                        <div class='result'>                                                        \
+                          <div>                                                                     \
+                            <span class='timestamp'>{timestamp}</span>                              \
+                            <span class='version'>{version}</span>                                  \
+                          </div>                                                                    \
+                                                                                                    \
+                          <div class='update'>                                                                     \
+                            <pre>{update}</pre>                                      \
+                            {.section update_error}                                                 \
+                              <pre class='error'>{update_error}</pre>                         \
+                            {.end}                                                                  \
+                          </div>                                                                    \
+                                                                                                    \
+                          <div class='test'>                                                        \
+                            <pre>{test}</pre>                                                       \
+                            {.section test_error}                                                   \
+                              <pre class='error'>{test_error}</pre>                                               \
+                            {.end}                                                                  \
+                          </div>                                                                    \
+                        </div>                                                                      \
+                      {.end}                                                                        \
+                    {.or}                                                                           \
+                      <p>No test reports found. Please run the `ci` executable.</p>                 \
+                    {.end}                                                                          \
+                  </div>                                                                            \
+                </div>                                                                              \
+              {.end}                                                                                \
+            {.or}                                                                                   \
+              <p>No projects found.</p>                                                             \
+            {.end}                                                                                  \
+          </div>                                                                                    \
+        ");
+        
+        var html = template.expand(json);
+        $("replace").update(html);
+        
+        // // Hide all errors by default
+        // $$('.error').invoke('hide');
+        // 
+        // $$('.project').each(function(project) {
+        //   var firstResultsError = project.down('td.test').down('.error')
+        //   
+        //   // When the latest test result has an error (i.e. the project is broken)
+        //   if(firstResultsError) {
+        //     project.down('h2').addClassName('error');
+        //     
+        //     firstResultsError.show();
+        //     firstResultsError.adjacent('a')[0].onclick();
+        //   }
+        // });
+      }
+    </script>
+  </head>
+  <body onload="init();">
+    <h1>Projects</h1>
+    <div class="projects">
+      <div class="project">
+        <h2>Active Merchant</h2>
+        <div class="tests">
+          <a class="test latest" href="">19:59</a>,
+          <a class="test">18:59</a>,
+          <a class="test error">17:59</a>,
+          <a class="test">16:59</a>,
+          <a class="test error">15:59</a>
+        </div>
+      </div>
+      <div class="project">
+        <h2>Active Merchant</h2>
+        <div class="tests">
+          <a class="test latest" href="">19:59</a>,
+          <a class="test">18:59</a>,
+          <a class="test error">17:59</a>,
+          <a class="test">16:59</a>,
+          <a class="test error">15:59</a>
+        </div>
+      </div>
+      <div class="project">
+        <h2>Active Merchant</h2>
+        <div class="results">
+
+          <div class="result">
+            <div>
+              <span class="timestamp">Mon Sep 21 00:42:14 -0400 2009</span>
+              <span class="version">cc979bf5ccf55c8be4bd0e9ee11e03bfbc135ca2</span>
+            </div>
+            
+            <div>
+              <pre class="update">remote: Counting objects: 27, done.
+remote: Compressing objects: 100% (21/21), done.
+remote: Total 21 (delta 13), reused 0 (delta 0)
+Unpacking objects: 100% (21/21), done.
+From github.com:Shopify/shopify
+* branch            master     -> FETCH_HEAD
+First, rewinding head to replay your work on top of it...
+Fast-forwarded master to b4300fbfcabe2c134304c7279a15d6273b025fbe.</pre>
+              <div class="test">
+                <pre>(in /Users/edward/src/crazy_ivan/www/projects/active_merchant)</pre>
+                <pre>/System/Library/Frameworks/Ruby.framework/Versions/1.8/usr/bin/ruby -I"lib" -rubygems "/Library/Ruby/Gems/1.8/gems/rake-0.8.7/lib/rake/rake_test_loader.rb" "test/unit/avs_result_test.rb" "test/unit/base_test.rb" "test/unit/check_test.rb" "test/unit/country_code_test.rb" "test/unit/country_test.rb" "test/unit/credit_card_formatting_test.rb" "test/unit/credit_card_methods_test.rb" "test/unit/credit_card_test.rb" "test/unit/cvv_result_test.rb" "test/unit/expiry_date_test.rb" "test/unit/gateways/authorize_net_cim_test.rb" "test/unit/gateways/authorize_net_test.rb" "test/unit/gateways/beanstream_interac_test.rb" "test/unit/gateways/beanstream_test.rb" "test/unit/gateways/bogus_test.rb" "test/unit/gateways/braintree_test.rb" "test/unit/gateways/card_stream_test.rb" "test/unit/gateways/cyber_source_test.rb" "test/unit/gateways/data_cash_test.rb" "test/unit/gateways/efsnet_test.rb" "test/unit/gateways/eway_test.rb" "test/unit/gateways/exact_test.rb" "test/unit/gateways/gateway_test.rb" "test/unit/gateways/linkpoint_test.rb" "test/unit/gateways/modern_payments_cim_test.rb" "test/unit/gateways/moneris_test.rb" "test/unit/gateways/net_registry_test.rb" "test/unit/gateways/netbilling_test.rb" "test/unit/gateways/pay_junction_test.rb" "test/unit/gateways/pay_secure_test.rb" "test/unit/gateways/payflow_express_test.rb" "test/unit/gateways/payflow_express_uk_test.rb" "test/unit/gateways/payflow_test.rb" "test/unit/gateways/payflow_uk_test.rb" "test/unit/gateways/payment_express_test.rb" "test/unit/gateways/paypal_express_test.rb" "test/unit/gateways/paypal_test.rb" "test/unit/gateways/plugnpay_test.rb" "test/unit/gateways/protx_test.rb" "test/unit/gateways/psigate_test.rb" "test/unit/gateways/psl_card_test.rb" "test/unit/gateways/quickpay_test.rb" "test/unit/gateways/realex_test.rb" "test/unit/gateways/sage_bankcard_test.rb" "test/unit/gateways/sage_virtual_check_test.rb" "test/unit/gateways/secure_pay_au_test.rb" "test/unit/gateways/secure_pay_tech_test.rb" "test/unit/gateways/secure_pay_test.rb" "test/unit/gateways/skip_jack_test.rb" "test/unit/gateways/trans_first_test.rb" "test/unit/gateways/trust_commerce_test.rb" "test/unit/gateways/usa_epay_test.rb" "test/unit/gateways/verifi_test.rb" "test/unit/gateways/viaklix_test.rb" "test/unit/gateways/wirecard_test.rb" "test/unit/integrations/action_view_helper_test.rb" "test/unit/integrations/bogus_module_test.rb" "test/unit/integrations/chronopay_module_test.rb" "test/unit/integrations/gestpay_module_test.rb" "test/unit/integrations/helpers/bogus_helper_test.rb" "test/unit/integrations/helpers/chronopay_helper_test.rb" "test/unit/integrations/helpers/gestpay_helper_test.rb" "test/unit/integrations/helpers/hi_trust_helper_test.rb" "test/unit/integrations/helpers/nochex_helper_test.rb" "test/unit/integrations/helpers/paypal_helper_test.rb" "test/unit/integrations/helpers/quickpay_helper_test.rb" "test/unit/integrations/helpers/two_checkout_helper_test.rb" "test/unit/integrations/hi_trust_module_test.rb" "test/unit/integrations/nochex_module_test.rb" "test/unit/integrations/notifications/chronopay_notification_test.rb" "test/unit/integrations/notifications/gestpay_notification_test.rb" "test/unit/integrations/notifications/hi_trust_notification_test.rb" "test/unit/integrations/notifications/nochex_notification_test.rb" "test/unit/integrations/notifications/notification_test.rb" "test/unit/integrations/notifications/paypal_notification_test.rb" "test/unit/integrations/notifications/quickpay_notification_test.rb" "test/unit/integrations/notifications/two_checkout_notification_test.rb" "test/unit/integrations/paypal_module_test.rb" "test/unit/integrations/quickpay_module_test.rb" "test/unit/integrations/returns/chronopay_return_test.rb" "test/unit/integrations/returns/gestpay_return_test.rb" "test/unit/integrations/returns/hi_trust_return_test.rb" "test/unit/integrations/returns/nochex_return_test.rb" "test/unit/integrations/returns/paypal_return_test.rb" "test/unit/integrations/returns/return_test.rb" "test/unit/integrations/returns/two_checkout_return_test.rb" "test/unit/integrations/two_checkout_module_test.rb" "test/unit/post_data_test.rb" "test/unit/posts_data_test.rb" "test/unit/response_test.rb" "test/unit/utils_test.rb" "test/unit/validateable_test.rb" 
+              /Library/Ruby/Site/1.8/rubygems/custom_require.rb:31:in `gem_original_require': no such file to load -- money (LoadError)
+              from /Library/Ruby/Site/1.8/rubygems/custom_require.rb:31:in `require'
+              from ./test/unit/../test_helper.rb:7
+              from /Library/Ruby/Site/1.8/rubygems/custom_require.rb:31:in `gem_original_require'
+              from /Library/Ruby/Site/1.8/rubygems/custom_require.rb:31:in `require'
+              from ./test/unit/avs_result_test.rb:1
+              from /Library/Ruby/Gems/1.8/gems/rake-0.8.7/lib/rake/rake_test_loader.rb:5:in `load'
+              from /Library/Ruby/Gems/1.8/gems/rake-0.8.7/lib/rake/rake_test_loader.rb:5
+              from /Library/Ruby/Gems/1.8/gems/rake-0.8.7/lib/rake/rake_test_loader.rb:5:in `each'
+              from /Library/Ruby/Gems/1.8/gems/rake-0.8.7/lib/rake/rake_test_loader.rb:5
+              rake aborted!
+Command failed with status (1): [/System/Library/Frameworks/Ruby.framework/...]
+
+(See full trace by running task with --trace)</pre>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    
+    <hr />
+    <div id="replace"></div>
+    
+    <div class="footer">
+      <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
+    </div>
+  </body>
+</html>
