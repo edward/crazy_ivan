@@ -7,7 +7,7 @@
         <div class='tests'>
           {.section reports}
             {.repeated section @}
-              <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href=''>{timestamp}</a>
+              <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href='#'>{timestamp}</a>
             {.end}
           {.end}
         </div>

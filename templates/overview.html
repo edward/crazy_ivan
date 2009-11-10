@@ -80,15 +80,21 @@
         }
         new Ajax.Request(template_name, options)
         
-        // Reformat the test timestamps to be less enormous
-        $$('.project .tests .test').each(function(t) {
-          t.update(Date.parse(t.innerHTML).toString("HH:mm"));
-        });
-        
-        
         $$('.project .tests').each(function(t) {
           t.down('.test').addClassName('latest')
         });
+        
+        // Reformat the test timestamps to be less enormous
+        $$('.project .tests .test').each(function(t) {
+          t.update(Date.parse(t.innerHTML).toString("HH:mm"));
+          t.observe('click', function(e) {
+            console.debug("hallo");
+            $$('.results').invoke('show')
+            return false;
+          });
+        });
+        
+        $$('.results').invoke('hide')
       }
     </script>
   </head>

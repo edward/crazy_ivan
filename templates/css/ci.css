@@ -26,6 +26,7 @@ pre { margin: 0;}
 .results .result .test { margin: 6px 0 6px 12px }
 
 .footer { 
+  margin: 24px 0 0 0;
   font-size: 60%;
   width: 100%;
   text-align: center;
