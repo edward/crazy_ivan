@@ -6,12 +6,7 @@ body {
   font: 100%/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-table { margin: 0;}
-
-td {
-  vertical-align: top;
-/*  font-size: 75%;*/
-}
+h1 { margin: 0;}
 
 pre { margin: 0;}
 
@@ -19,43 +14,16 @@ pre { margin: 0;}
   color: red;
 }
 
-/*.collapsible { width: 4em; overflow: hidden; display: block; }*/
-
 .project h2 { margin: 12px 0 0 0;}
 
-.project .tests { margin-left: 18px; }
-.tests .test { font-size: 80%;}
-.tests  .latest { font-size: 100%;}
+.tests { margin: 0 0 0 18px;}
+.tests .test { font-size: 80%; margin-right: 8px;}
+.tests .latest { font-size: 100%;}
 
-table.result { margin-bottom: 12px;}
-
-table.result .timestamp,
-table.result .update { vertical-align: bottom }
-
-table.result .timestamp,
-table.result .version { text-align: right }
-
-table.result .version,
-table.result .test { vertical-align: top }
-
-table.result .test, { padding: left: 8px;}
-
-table.result .update { padding-left: 8px }
-table.result .test { padding: 2px 0 0 6px }
-
-table.result .version { font-size: 90%; }
-
-
-.alternate .result td { vertical-align: top; text-align: left;}
-.alternate .result .timestamp { margin-right: 12px;}
-.alternate .result .version { vertical-align: bottom; font-size: 100%;}
-.alternate .result .update { padding: 4px;}
-.alternate .result .test { padding: 4px;}
-
-
-div.result .timestamp { margin-right: 12px;}
-
-
+.results .result { margin: 12px 18px 8px 18px;}
+.results .result .timestamp { margin-right: 12px;}
+.results .result .update { margin: 6px 0 6px 12px }
+.results .result .test { margin: 6px 0 6px 12px }
 
 .footer { 
   font-size: 60%;
