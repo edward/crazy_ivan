@@ -7,6 +7,8 @@
     
     <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
     <script type="text/javascript" src="javascript/prototype.js"></script>
+    <script type="text/javascript" src="javascript/scriptaculous.js"></script>
+    <script type="text/javascript" src="javascript/date.js"></script>
     <script type="text/javascript" src="javascript/json-template.js"></script>
     <script type="text/javascript">
       var init = function() {
@@ -68,72 +70,83 @@
       }
       
       var render = function(template_name, json) {
-        var template = jsontemplate.Template("                                             \
-          {.section projects}                                                              \
-            {.repeated section @}                                                          \
-              <div class='project'>                                                        \
-                <h2>{name}</h2>                                                            \
-                {.section reports}                                                         \
-                  <table class='reports'>                                                  \
-                    <tr>                                                                   \
-                      <th class='timestamp'>Timestamp</th>                                 \
-                      <th class='version'>Version</th>                                     \
-                      <th class='update'>Update Result</th>                                \
-                      <th class='test'>Test Result</th>                                    \
-                    </tr>                                                                  \
-                    {.repeated section @}                                                  \
-                      <tr>                                                                 \
-                        <td class='timestamp'>{timestamp}</td>                             \
-                        <td class='version'>{version}</td>                                 \
-                        <td class='update'>                                                \
-                          <pre>{update}</pre>                                              \
-                          {.section update_error}                                          \
-                            <div class='error'><pre>{update_error}<pre></div>              \
-                          {.end}                                                           \
-                        </td>                                                              \
-                        <td class='test'>                                                  \
-                          <pre>{test}</pre>                                                \
-                          {.section test_error}                                            \
-                            <a href='#' onclick='expand(this)'>Click to see error</a>      \
-                            <div class='error' style='display: hidden'>                    \
-                              <pre>{test_error}<pre>                                       \
-                            </div>                                                         \
-                          {.end}                                                           \
-                        </td>                                                              \
-                      </tr>                                                                \
-                    {.end}                                                                 \
-                  </table>                                                                 \
-                {.or}                                                                      \
-                  <p>No test reports found. Please run the `ci` executable.</p>            \
-                {.end}                                                                     \
-              {.end}                                                                       \
-            </div>                                                                         \
-          {.or}                                                                            \
-            <p>No projects found.</p>                                                      \
-          {.end}                                                                           \
+        var template = jsontemplate.Template("                                                                                             \
+          <h1>Projects</h1>                                                                                                                \
+          <div class='projects'>                                                                                                           \
+            {.section projects}                                                                                                            \
+              {.repeated section @}                                                                                                        \
+                <div class='project'>                                                                                                      \
+                  <h2>{name}</h2>                                                                                                          \
+                  <div class='tests'>                                                                                                      \
+                    {.section reports}                                                                                                     \
+                      {.repeated section @}                                                                                                \
+                        <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href='#'>{timestamp}</a>   \
+                      {.end}                                                                                                               \
+                    {.end}                                                                                                                 \
+                  </div>                                                                                                                   \
+                  <div class='results'>                                                                                                    \
+                    {.section reports}                                                                                                     \
+                      {.repeated section @}                                                                                                \
+                        <div class='result'>                                                                                               \
+                          <div>                                                                                                            \
+                            <span class='timestamp'>{timestamp}</span>                                                                     \
+                            <span class='version'>{version}</span>                                                                         \
+                          </div>                                                                                                           \
+                                                                                                                                           \
+                          <div class='update'>                                                                                             \
+                            <pre>{update}</pre>                                                                                            \
+                            {.section update_error}                                                                                        \
+                              <pre class='error'>{update_error}</pre>                                                                      \
+                            {.end}                                                                                                         \
+                          </div>                                                                                                           \
+                                                                                                                                           \
+                          <div class='test'>                                                                                               \
+                            <pre>{test}</pre>                                                                                              \
+                            {.section test_error}                                                                                          \
+                              <pre class='error'>{test_error}</pre>                                                                        \
+                            {.end}                                                                                                         \
+                          </div>                                                                                                           \
+                        </div>                                                                                                             \
+                      {.end}                                                                                                               \
+                    {.or}                                                                                                                  \
+                      <p>No test reports found. Please run the `ci` executable.</p>                                                        \
+                    {.end}                                                                                                                 \
+                  </div>                                                                                                                   \
+                </div>                                                                                                                     \
+              {.end}                                                                                                                       \
+            {.or}                                                                                                                          \
+              <p>No projects found.</p>                                                                                                    \
+            {.end}                                                                                                                         \
+          </div>                                                                                                                           \
         ");
         
         var html = template.expand(json);
         $("replace").update(html);
         
-        // Hide all errors by default
-        $$('.error').invoke('hide');
         
-        $$('.project').each(function(project) {
-          var firstResultsError = project.down('td.test').down('.error')
-          
-          // When the latest test result has an error (i.e. the project is broken)
-          if(firstResultsError) {
-            project.down('h2').addClassName('error');
-            
-            firstResultsError.show();
-            firstResultsError.adjacent('a')[0].onclick();
-          }
+        $$('.project .tests').each(function(t) {
+          t.down('.test').addClassName('latest')
         });
+        
+        // Reformat the test timestamps to be less enormous
+        $$('.project .tests .test').each(function(t) {
+          t.update(Date.parse(t.innerHTML).toString("HH:mm"));
+          t.observe('click', function(e) {
+            console.debug("hallo");
+            $$('.results').invoke('show')
+            return false;
+          });
+        });
+        
+        $$('.results').invoke('hide')
       }
     </script>
   </head>
   <body onload="init();">
     <div id="replace"></div>
+    
+    <div class="footer">
+      <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
+    </div>
   </body>
 </html>
