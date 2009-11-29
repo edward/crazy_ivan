@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'yaml'
-require File.join(File.dirname(__FILE__), 'report_assembler')
-require File.join(File.dirname(__FILE__), 'test_runner')
-require File.join(File.dirname(__FILE__), 'html_asset_crush')
+
+require 'crazy_ivan/report_assembler'
+require 'crazy_ivan/test_runner'
+require 'crazy_ivan/html_asset_crush'
