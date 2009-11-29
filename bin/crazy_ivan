@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby -wKU
+#!/usr/bin/env ruby
 
 require File.join(File.dirname(__FILE__), *%w[.. lib crazy_ivan])
 require File.join(File.dirname(__FILE__), *%w[.. vendor json-1.1.7 lib json])
