@@ -59,14 +59,15 @@ module CrazyIvan
 
   def self.generate_test_reports_in(output_directory)
     FileUtils.mkdir_p(output_directory)
+    report = ReportAssembler.new(output_directory)
+    
     Dir['*'].each do |dir|
       if File.directory?(dir)
-        report = ReportAssembler.new(output_directory)
         report.test_results << TestRunner.new(dir).invoke
-        report.generate
-      else
-        STDERR.puts "Expected a directory to put the test results in (and didn't get one)."
       end
     end
+    
+    report.generate
+    puts "Generated test reports for #{report.test_results.size} projects"
   end
 end

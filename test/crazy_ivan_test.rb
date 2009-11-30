@@ -28,7 +28,8 @@ class CrazyIvanTest < Test::Unit::TestCase
       projects = JSON.parse(File.open('test-results/projects.json').read)["projects"]
       recent_versions = JSON.parse(File.open('test-results/some-project/recent.json').read)["recent_versions"]
       
-      assert_equal 'some-project', projects.first
+      assert_equal 2, projects.size
+      assert projects.include?('some-project')
       assert_equal 'a-valid-version', recent_versions.first
     end
   end
@@ -40,6 +41,7 @@ class CrazyIvanTest < Test::Unit::TestCase
       Dir.mkdir('projects')
       Dir.chdir('projects') do |projects_dir|
         Dir.mkdir('some-project')
+        Dir.mkdir('some-other-project')
         CrazyIvan.setup
       end
       
