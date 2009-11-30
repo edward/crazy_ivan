@@ -4,8 +4,8 @@ require 'tmpdir'
 class CrazyIvanTest < Test::Unit::TestCase
   def test_setup
     setup_crazy_ivan do
-      assert File.exists?('projects/some-project/.ci/update')
       assert File.exists?('projects/some-project/.ci/version')
+      assert File.exists?('projects/some-project/.ci/update')
       assert File.exists?('projects/some-project/.ci/test')
     end
   end
@@ -33,6 +33,26 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert_equal 'a-valid-version', recent_versions.first
     end
   end
+  
+  def test_external_scripts_not_overwritten
+    setup_external_scripts_to_all_be_successful
+    
+    setup_crazy_ivan do
+      CrazyIvan.setup
+      
+      File.open('projects/some-project/.ci/version', 'a') do |file|
+        file << "a change to the script"
+      end
+
+      FileUtils.copy('projects/some-project/.ci/version', 'projects/some-project/.ci/version_original')
+      
+      CrazyIvan.setup
+      
+      assert FileUtils.compare_file('projects/some-project/.ci/version_original', 'projects/some-project/.ci/version')
+    end
+  end
+  
+  private
   
   def setup_crazy_ivan
     Dir.mktmpdir('continuous-integration') do |tmpdir|
