@@ -5,68 +5,7 @@ require File.join(File.dirname(__FILE__), *%w[.. vendor json-1.1.7 lib json])
 require "optparse"
 require "logger"
 
-CRAZY_IVAN_VERSION = File.read(File.join(File.dirname(__FILE__), *%w[.. VERSION]))
-
-def setup
-  Dir['*'].each do |dir|
-    Dir.chdir(dir) do
-      FileUtils.mkdir_p('.ci')
-
-      Dir.chdir('.ci') do
-        File.open('update', 'w+') do |f|
-          f.puts "#!/usr/bin/env bash"
-          f.puts
-          f.puts "# This script updates your code"
-          f.puts "#"
-          f.puts "# If you're not using a code repository system, this script could just do some"
-          f.puts "# some basic copying commands."
-          f.puts
-          f.puts "git pull"
-        end
-      
-        File.open('version', 'w+') do |f|
-          f.puts "#!/usr/bin/env ruby -wKU"
-          f.puts
-          f.puts "# This script grabs a unique hash from your version control system"
-          f.puts "#"
-          f.puts "# If you're not able to use a VCS, this script could just generate a timestamp."
-          f.puts
-          f.puts "puts `git show`[/^commit (.+)$/, 1]"
-        end
-      
-        File.open('test', 'w+') do |f|
-          f.puts "#!/usr/bin/env bash"
-          f.puts
-          f.puts "# This script runs your testing suite. For a typical Ruby project running"
-          f.puts "# test-unit this is probably all you need."
-          f.puts
-          f.puts "rake"
-        end
-        
-        File.chmod 0755, 'update', 'version', 'test'
-      end
-      
-      puts
-      puts "Created #{dir}/.ci/update"
-      puts "        #{' ' * (dir + "/.ci").size}/version"
-      puts "        #{' ' * (dir + "/.ci").size}/test"
-      puts
-      puts "Take a look at those 3 scripts to make sure "
-      puts "they do the right thing for each case."
-      puts
-    end
-  end
-end
-
-def generate_test_reports_in(output_directory)
-  Dir['*'].each do |dir|
-    if File.directory?(dir)
-      report = ReportAssembler.new(output_directory)
-      report.test_results << TestRunner.new(dir).invoke
-      report.generate
-    end
-  end
-end
+include CrazyIvan
 
 def show_howto
   puts "Hankering for a continuous integration server, eh?"
@@ -117,10 +56,8 @@ ARGV.options do |opts|
     case ARGV[0]
     when /setup/
       setup
-    when /\w+/
-      output_directory = ARGV[0]
-      FileUtils.mkdir_p(output_directory)
-      generate_test_reports_in(output_directory)
+    when /\w+/  # a directory for test results
+      generate_test_reports_in(ARGV[0])
     else
       show_howto
       exit

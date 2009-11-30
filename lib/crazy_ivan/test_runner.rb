@@ -2,7 +2,7 @@ require 'open3'
 
 class TestRunner
 
-  class Result < Struct.new(:project_name, :update_output, :version_output, :test_output, :update_error, :test_error, :timestamp)
+  class Result < Struct.new(:project_name, :version_output, :update_output, :test_output, :version_error, :update_error, :test_error, :timestamp)
   end
   
   def initialize(project_path)
@@ -53,14 +53,21 @@ class TestRunner
   
   def invoke
     if valid?
-      project_name = @project_path.split(File::SEPARATOR).last
+      project_name = File.basename(@project_path)
       results = Result.new(project_name)
       
-      results.version_output = run_script('version').join
-      results.update_output, results.update_error = run_script('update')
+      results.version_output, results.version_error = run_script('version')
+      
+      if results.version_error.empty?
+        results.update_output, results.update_error = run_script('update')
+      else
+        results.update_output, results.update_error = '', ''
+      end
       
       if results.update_error.empty?
         results.test_output, results.test_error = run_script('test')
+      else
+        results.test_output, results.test_error = '', ''
       end
       
       results.timestamp = Time.now

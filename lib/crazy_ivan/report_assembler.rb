@@ -1,7 +1,7 @@
 class ReportAssembler
   MAXIMUM_RECENTS = 10
   ROOT_PATH = File.expand_path(File.dirname(__FILE__))
-  TEMPLATES_PATH = File.join(ROOT_PATH, *%w[.. templates])
+  TEMPLATES_PATH = File.join(ROOT_PATH, *%w[.. .. templates])
   
   attr_accessor :test_results
   
@@ -37,7 +37,7 @@ class ReportAssembler
       filename = filename_from_version(result.version_output)
       File.open("#{filename}.json", 'w+') do |f|
         f.puts({
-                 "version" => result.version_output,
+                 "version" => [result.version_error, result.version_output].join,
                  "timestamp" => result.timestamp,
                  "update" => result.update_output,
                  "update_error" => result.update_error,
