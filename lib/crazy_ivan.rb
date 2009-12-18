@@ -1,3 +1,4 @@
+require 'syslog'
 require 'fileutils'
 require 'crazy_ivan/report_assembler'
 require 'crazy_ivan/test_runner'
@@ -58,6 +59,7 @@ module CrazyIvan
   end
 
   def self.generate_test_reports_in(output_directory)
+    Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS)
     FileUtils.mkdir_p(output_directory)
     report = ReportAssembler.new(output_directory)
     
@@ -68,6 +70,11 @@ module CrazyIvan
     end
     
     report.generate
-    puts "Generated test reports for #{report.test_results.size} projects"
+    
+    msg = "Generated test reports for #{report.test_results.size} projects"
+    Syslog.info(msg)
+    puts msg
+  ensure
+    Syslog.close
   end
 end
