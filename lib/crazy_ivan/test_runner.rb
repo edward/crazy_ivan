@@ -60,14 +60,14 @@ class TestRunner
       
       if results.version_error.empty?
         results.update_output, results.update_error = run_script('update')
+        
+        if results.update_error.empty?
+          results.test_output, results.test_error = run_script('test')
+        else
+          results.test_output, results.test_error = '', ''
+        end
       else
         results.update_output, results.update_error = '', ''
-      end
-      
-      if results.update_error.empty?
-        results.test_output, results.test_error = run_script('test')
-      else
-        results.test_output, results.test_error = '', ''
       end
       
       results.timestamp = Time.now

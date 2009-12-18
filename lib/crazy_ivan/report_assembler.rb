@@ -34,7 +34,12 @@ class ReportAssembler
   def update_project(result)
     FileUtils.mkdir_p(result.project_name)
     Dir.chdir(result.project_name) do
-      filename = filename_from_version(result.version_output)
+      if result.version_error.empty?
+        filename = filename_from_version(result.version_output)
+      else
+        filename = filename_from_version(result.version_error)
+      end
+      
       File.open("#{filename}.json", 'w+') do |f|
         f.puts({
                  "version" => [result.version_error, result.version_output].join,
