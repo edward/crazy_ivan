@@ -41,14 +41,7 @@ class ReportAssembler
       end
       
       File.open("#{filename}.json", 'w+') do |f|
-        f.puts({
-                 "version" => [result.version_error, result.version_output].join,
-                 "timestamp" => result.timestamp,
-                 "update" => result.update_output,
-                 "update_error" => result.update_error,
-                 "test" => result.test_output,
-                 "test_error" => result.test_error
-               }.to_json)
+        f.puts(result.to_json)
       end
       
       update_recent(result, filename)

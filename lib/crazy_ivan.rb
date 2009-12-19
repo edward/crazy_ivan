@@ -16,7 +16,7 @@ module CrazyIvan
           File.open('version', 'w+') do |f|
             f.puts "#!/usr/bin/env ruby"
             f.puts
-            f.puts "# This script grabs a unique hash from your version control system"
+            f.puts "# This script grabs a unique version name from your version control system"
             f.puts "#"
             f.puts "# If you're not able to use a VCS, this script could just generate a timestamp."
             f.puts
@@ -42,8 +42,21 @@ module CrazyIvan
             f.puts
             f.puts "rake"
           end
+          
+          File.open('conclusion', 'w+') do |f|
+            f.puts "#!/usr/bin/env ruby"
+            f.puts
+            f.puts "# This script is piped the results of the testing suite run."
+            f.puts
+            f.puts "# If you're interested in bouncing the message to campfire, "
+            f.puts "# emailing, or otherwise sending notifications, this is the place to do it."
+            f.puts
+            f.puts "# To enable campfire notifications, uncomment the following line:"
+            f.puts "# IO.popen('test_report2campfire', 'w') {|f| f.puts STDIN.read }"
+            f.puts
+          end
 
-          File.chmod 0755, 'update', 'version', 'test'
+          File.chmod 0755, 'update', 'version', 'test', 'conclusion'
         end
 
         puts

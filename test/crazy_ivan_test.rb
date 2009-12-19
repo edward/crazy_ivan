@@ -2,6 +2,16 @@ require 'test_helper'
 require 'tmpdir'
 
 class CrazyIvanTest < Test::Unit::TestCase
+  def setup
+    @results = TestRunner::Result.new
+    @results.version_output = 'a-valid-version'
+    @results.version_error = ''
+    @results.update_output = 'Updated successfully'
+    @results.update_error = ''
+    @results.test_output = 'Some valid test results. No fails.'
+    @results.test_error = ''
+  end
+  
   def test_setup
     setup_crazy_ivan do
       assert File.exists?('projects/some-project/.ci/version')
@@ -14,10 +24,7 @@ class CrazyIvanTest < Test::Unit::TestCase
     setup_external_scripts_to_all_be_successful
     
     setup_crazy_ivan do
-      # crazy_ivan runs from the projects directory
-      Dir.chdir('projects') do
-        do_silently { CrazyIvan.generate_test_reports_in('../test-results') }
-      end
+      run_crazy_ivan
       
       assert File.exists?('test-results/index.html')
       assert File.exists?('test-results/projects.json')
@@ -50,6 +57,7 @@ class CrazyIvanTest < Test::Unit::TestCase
   
   def test_nil_reports_not_created
     Open3.stubs(:popen3).with('.ci/version').yields(stub(:close), stub(:read => ''), stub(:read => 'could not find the command you were looking for'))
+    Open3.stubs(:popen3).with('.ci/conclusion').yields(stub(:puts), stub(), stub(:read => ''))
     
     setup_crazy_ivan do
       Dir.chdir('projects') do
@@ -57,6 +65,24 @@ class CrazyIvanTest < Test::Unit::TestCase
       end
       
       assert !File.exists?('test-results/some-project/nil.json')
+    end
+  end
+  
+  def test_conclusion_executed
+    Open3.stubs(:popen3).with('.ci/version').yields(stub(:close), stub(:read => @results.version_output), stub(:read => @results.version_error))
+    Open3.stubs(:popen3).with('.ci/update').yields(stub(:close), stub(:read => @results.update_output), stub(:read => @results.update_error))
+    Open3.stubs(:popen3).with('.ci/test').yields(stub(:close), stub(:read => @results.test_output), stub(:read => @results.test_error))
+    
+    @results.timestamp = Time.now
+    Time.stubs(:now => @results.timestamp)
+    
+    fake_stdin = mock()
+    fake_stdin.expects(:puts).with(@results.to_json).at_least_once
+    
+    Open3.stubs(:popen3).with('.ci/conclusion').yields(fake_stdin, stub(), stub(:read => ''))
+    
+    setup_crazy_ivan do
+      run_crazy_ivan
     end
   end
   
@@ -77,16 +103,18 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
-  def setup_external_scripts_to_all_be_successful
-    Open3.stubs(:popen3).with('.ci/version').yields(stub(:close), stub(:read => 'a-valid-version'), stub(:read => ''))
-    Open3.stubs(:popen3).with('.ci/update').yields(stub(:close), stub(:read => 'Updated successfully.'), stub(:read => ''))
-    Open3.stubs(:popen3).with('.ci/test').yields(stub(:close), stub(:read => 'Some valid test results. No fails.'), stub(:read => ''))
+  def run_crazy_ivan
+    # crazy_ivan runs from the projects directory
+    Dir.chdir('projects') do
+      do_silently { CrazyIvan.generate_test_reports_in('../test-results') }
+    end
   end
   
-  def do_silently
-    orig_stdout = $stdout
-    $stdout = File.new('/dev/null', 'w')
-    yield
-    $stdout = orig_stdout
+  def setup_external_scripts_to_all_be_successful
+    Open3.stubs(:popen3).with('.ci/version').yields(stub(:close), stub(:read => @results.version_output), stub(:read => @results.version_error))
+    Open3.stubs(:popen3).with('.ci/update').yields(stub(:close), stub(:read => @results.update_output), stub(:read => @results.update_error))
+    Open3.stubs(:popen3).with('.ci/test').yields(stub(:close), stub(:read => @results.test_output), stub(:read => @results.test_error))
+    
+    Open3.stubs(:popen3).with('.ci/conclusion').yields(stub(:puts), stub(), stub(:read => ''))
   end
 end
