@@ -51,8 +51,11 @@ module CrazyIvan
             f.puts "# If you're interested in bouncing the message to campfire, "
             f.puts "# emailing, or otherwise sending notifications, this is the place to do it."
             f.puts
-            f.puts "# To enable campfire notifications, uncomment the following line:"
-            f.puts "# IO.popen('test_report2campfire', 'w') {|f| f.puts STDIN.read }"
+            f.puts "# To enable campfire notifications, uncomment the next lines:"
+            f.puts "# CAMPFIRE_ROOM_URL = 'http://your-company.campfirenow.com/room/265250'"
+            f.puts "# CAMPFIRE_API_KEY = '23b8al234gkj80a3e372133l4k4j34275f80ef8971'"
+            f.puts "# CRAZY_IVAN_REPORTS_URL = 'http://ci.your-projects.com'"
+            f.puts "# IO.popen(\"test_report2campfire \#{CAMPFIRE_ROOM_URL} \#{CAMPFIRE_API_KEY} \#{CRAZY_IVAN_REPORTS_URL}\", 'w') {|f| f.puts STDIN.read }"
             f.puts
           end
 
@@ -63,9 +66,18 @@ module CrazyIvan
         puts "Created #{dir}/.ci/update"
         puts "        #{' ' * (dir + "/.ci").size}/version"
         puts "        #{' ' * (dir + "/.ci").size}/test"
+        puts "        #{' ' * (dir + "/.ci").size}/conclusion"
         puts
-        puts "Take a look at those 3 scripts to make sure "
-        puts "they do the right thing for each case."
+        puts "Take a look at those 4 scripts to make sure they each do the right thing."
+        puts
+        puts "When you're ready, run"
+        puts
+        puts "  crazy_ivan /path/to/directory/your/reports/go"
+        puts
+        puts "then look at index.html in that path to confirm that everything is ok."
+        puts
+        puts "If things look good, then set up a cron task or other script to run"
+        puts "crazy_ivan on a periodic basis."
         puts
       end
     end
@@ -87,6 +99,7 @@ module CrazyIvan
     msg = "Generated test reports for #{report.test_results.size} projects"
     Syslog.info(msg)
     puts msg
+    # REFACTOR to use a logger that spits out to both STDOUT and Syslog
   ensure
     Syslog.close
   end

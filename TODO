@@ -31,3 +31,9 @@
 * Use datejs to parse the timestamp to easily produce deltas (i.e. "Last test ran 2 days ago")
 
 * Do something like use a file-lock to prevent overlapping runs and notify in the index.html that it's happening
+
+* Write a man page with Ron: http://github.com/rtomayko/ron
+
+* Refactor and document Syslog to have method names that actually match the syslog levels (like #error instead of #err )
+
+* Don't overwrite existing config files and warn when skipping

@@ -9,18 +9,18 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edward Ocampo-Gooding"]
-  s.date = %q{2009-11-30}
+  s.date = %q{2010-01-08}
   s.default_executable = %q{crazy_ivan}
   s.description = %q{Continuous integration should really just be a script that captures the output of running your project update & test commands and presents recent results in a static html page.
 
     By keeping test reports in json, per-project CI configuration in 3 probably-one-line scripts, things are kept simple, quick, and super extensible.
 
     Want to use git, svn, or hg? No problem.
-    Need to fire off results to Twitter or Campfire? It's one line away.
+    Need to fire off results to Campfire? It's one line away.
 
     CI depends on cron.}
   s.email = %q{edward@edwardog.net}
-  s.executables = ["crazy_ivan"]
+  s.executables = ["crazy_ivan", "test_report2campfire"]
   s.extra_rdoc_files = [
     "LICENSE",
      "README.rdoc",
@@ -34,6 +34,7 @@ Gem::Specification.new do |s|
      "TODO",
      "VERSION",
      "bin/crazy_ivan",
+     "bin/test_report2campfire",
      "crazy_ivan.gemspec",
      "lib/crazy_ivan.rb",
      "lib/crazy_ivan/html_asset_crush.rb",

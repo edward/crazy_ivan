@@ -2,10 +2,11 @@ require 'open3'
 
 class TestRunner
   
-  # REFACTOR this to just be a Hash and fix the resulting breakage
+  # REFACTOR this to just be a Hash
   class Result < Struct.new(:project_name, :version_output, :update_output, :test_output, :version_error, :update_error, :test_error, :timestamp)
     def to_json
-      { "version" => [version_error, version_output].join,
+      { "project_name" => project_name,
+        "version" => [version_error, version_output].join,
         "timestamp" => timestamp,
         "update" => update_output,
         "update_error" => update_error,
@@ -64,11 +65,14 @@ class TestRunner
   
   def run_conclusion(results)
     Dir.chdir(@project_path) do
+      Syslog.debug "Passing report to conclusion script at #{script_path('conclusion')}"
       Open3.popen3(script_path('conclusion')) do |stdin, stdout, stderr|
         stdin.puts results.to_json
+        stdin.close
         errors = stderr.read
-        Syslog.error(errors) if !errors.empty?
+        Syslog.err(errors) if !errors.empty?
       end
+      Syslog.debug "Finished executing conclusion script"
     end
   end
   
@@ -76,6 +80,7 @@ class TestRunner
     if valid?
       project_name = File.basename(@project_path)
       results = Result.new(project_name)
+      Syslog.info "Running tests for #{results.project_name}"
       
       results.version_output, results.version_error = run_script('version')
       

@@ -11,12 +11,16 @@ begin
     By keeping test reports in json, per-project CI configuration in 3 probably-one-line scripts, things are kept simple, quick, and super extensible.
 
     Want to use git, svn, or hg? No problem.
-    Need to fire off results to Twitter or Campfire? It's one line away.
+    Need to fire off results to Campfire? It's built-in.
 
     CI depends on cron."
     gem.email = "edward@edwardog.net"
     gem.homepage = "http://github.com/edward/crazy_ivan"
     gem.authors = ["Edward Ocampo-Gooding"]
+    gem.executables = ["crazy_ivan", "test_report2campfire"]
+    gem.default_executable = "crazy_ivan"
+    gem.files = FileList['.gitignore', '*.gemspec', 'lib/**/*', 'bin/*', 'templates/**/*', '[A-Z]*', 'test/**/*'].to_a
+    
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   
