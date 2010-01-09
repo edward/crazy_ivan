@@ -28,7 +28,15 @@ class ReportAssembler
       s += "-#{Dir["#{s}*.json"].size}"
     end
     
-    s
+    return s
+  end
+  
+  def nullify_successful_exit_status_for_json_templates(results)
+    results[:version][:exit_status] = nil if results[:version][:exit_status] == '0'
+    results[:update][:exit_status] = nil if results[:version][:exit_status] == '0'
+    results[:test][:exit_status] = nil if results[:version][:exit_status] == '0'
+    
+    return results
   end
   
   def update_project(result)
@@ -41,7 +49,7 @@ class ReportAssembler
       end
       
       File.open("#{filename}.json", 'w+') do |f|
-        f.puts(result.to_json)
+        f.puts(nullify_successful_exit_status_for_json_templates(result).to_json)
       end
       
       update_recent(result, filename)

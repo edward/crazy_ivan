@@ -33,7 +33,7 @@
             return version_test_report(project_name, version);
           })
           
-          project = {name: project_name, reports: reports};
+          project = {name: project_name, reports: reports.reverse()};
           projects.push(project);
         })
         
@@ -80,7 +80,7 @@
                   <div class='tests'>                                                                                                      \
                     {.section reports}                                                                                                     \
                       {.repeated section @}                                                                                                \
-                        <a class='test {.section test.error} error {.end} {.section update.error} error {.end}' href='#'>{timestamp}</a>   \
+                        <a class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp}</a>   \
                       {.end}                                                                                                               \
                     {.end}                                                                                                                 \
                   </div>                                                                                                                   \
@@ -90,26 +90,38 @@
                         <div class='result'>                                                                                               \
                           <div>                                                                                                            \
                             <span class='timestamp'>{timestamp}</span>                                                                     \
-                            <span class='version'>{version.output}</span>                                                                         \
+                            <span class='version'>{version.output}</span>                                                                  \
                           </div>                                                                                                           \
                                                                                                                                            \
+                          {.section version}                                                                                               \
+                            {.section exit_status}                                                                                         \
+                              <div class='version'>                                                                                        \
+                                <pre class='error'>{error}</pre>                                                                           \
+                              </div>                                                                                                       \
+                            {.end}                                                                                                         \
+                          {.end}                                                                                                           \
+                                                                                                                                           \
                           <div class='update'>                                                                                             \
-                            <pre>{update.output}</pre>                                                                                            \
-                            {.section update.error}                                                                                        \
-                              <pre class='error'>{update.error}</pre>                                                                      \
+                            <pre>{update.output}</pre>                                                                                     \
+                            {.section update}                                                                                              \
+                              {.section exit_status}                                                                                       \
+                                <pre class='error'>{update.error}</pre>                                                                    \
+                              {.end}                                                                                                       \
                             {.end}                                                                                                         \
                           </div>                                                                                                           \
                                                                                                                                            \
                           <div class='test'>                                                                                               \
-                            <pre>{test.output}</pre>                                                                                              \
-                            {.section test.error}                                                                                          \
-                              <pre class='error'>{test.error}</pre>                                                                        \
+                            <pre>{test.output}</pre>                                                                                       \
+                            {.section test}                                                                                                \
+                              {.section exit_status}                                                                                       \
+                                <pre class='error'>{test.error}</pre>                                                                      \
+                              {.end}                                                                                                       \
                             {.end}                                                                                                         \
                           </div>                                                                                                           \
                         </div>                                                                                                             \
                       {.end}                                                                                                               \
                     {.or}                                                                                                                  \
-                      <p>No test reports found. Please run the `ci` executable.</p>                                                        \
+                      <p>No test reports found. Please run crazy_ivan.</p>                                                                 \
                     {.end}                                                                                                                 \
                   </div>                                                                                                                   \
                 </div>                                                                                                                     \
