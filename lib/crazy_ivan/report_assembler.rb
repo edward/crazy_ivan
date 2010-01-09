@@ -10,15 +10,22 @@ class ReportAssembler
     @output_directory = output_directory
   end
   
-  def generate
-    Dir.chdir(@output_directory) do
-      @test_results.each do |result|
-        update_project(result)
-      end
-      
-      update_projects
-      update_index
-    end
+  def generate_for(runner)
+    # Write the first version of the report with just the start time to currently_building.json
+    runner.start!
+    update_project(runner)
+    
+    # Update the report in currently_building.json with the update output and error
+    runner.update!
+    update_project(runner)
+    
+    # Update the report in currently_building.json with the version output and error
+    runner.version!
+    update_project(runner)
+    
+    # Empty the currently_building.json and add to recents.json this new report with the test output and error
+    runner.test!
+    update_project(runner)
   end
   
   def filename_from_version(string)
@@ -39,25 +46,41 @@ class ReportAssembler
     return results
   end
   
-  def update_project(result)
-    FileUtils.mkdir_p(result[:project_name])
-    Dir.chdir(result[:project_name]) do
-      if result[:version][:exit_status] == '0'
-        filename = filename_from_version(result[:version][:output])
+  def flush_build_progress
+    File.open("currently_building.json", 'w+') do |f|
+      f.puts({}.to_json)
+    end
+  end
+  
+  def update_project(runner)
+    FileUtils.mkdir_p(runner.project_name)
+    Dir.chdir(runner.project_name) do
+      
+      filename = ''
+      
+      if runner.still_building?
+        filename = 'currently_building'
       else
-        filename = filename_from_version(result[:version][:error])
+        if runner.results[:version][:exit_status] == '0'
+          filename = filename_from_version(runner.results[:version][:output])
+        else
+          filename = filename_from_version(runner.results[:version][:error])
+        end
       end
       
       File.open("#{filename}.json", 'w+') do |f|
-        f.puts(nullify_successful_exit_status_for_json_templates(result).to_json)
+        f.puts(nullify_successful_exit_status_for_json_templates(runner.results).to_json)
       end
       
-      update_recent(result, filename)
+      if runner.finished?
+        flush_build_progress
+        update_recent(runner.results, filename)
+      end
     end
   end
   
   def update_recent(result, filename)
-    recent_versions_json = File.open('recent.json', File::RDWR|File::CREAT).read
+    recent_versions_json = File.open('recent.json', File::RDWR | File::CREAT).read
     
     recent_versions = []
     

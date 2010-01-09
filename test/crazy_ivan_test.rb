@@ -12,8 +12,8 @@ class CrazyIvanTest < Test::Unit::TestCase
   
   def test_setup
     setup_crazy_ivan do
-      assert File.exists?('projects/some-project/.ci/version')
       assert File.exists?('projects/some-project/.ci/update')
+      assert File.exists?('projects/some-project/.ci/version')
       assert File.exists?('projects/some-project/.ci/test')
     end
   end
@@ -37,6 +37,7 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
+  # Does this test really work? I think it's wrong
   def test_external_scripts_not_overwritten
     setup_external_scripts_to_all_be_successful
     
@@ -54,6 +55,10 @@ class CrazyIvanTest < Test::Unit::TestCase
   end
   
   def test_nil_reports_not_created
+    Open4.stubs(:popen4).with('.ci/update').yields(stub(),
+                                                   stub(:close),
+                                                   stub(:read => @results[:update][:output]),
+                                                   stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
     Open4.stubs(:popen4).with('.ci/version').yields(stub(),
                                                     stub(:close),
                                                     stub(:read => ''),
@@ -73,14 +78,14 @@ class CrazyIvanTest < Test::Unit::TestCase
   end
   
   def test_conclusion_executed
-    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
-                                                    stub(:close),
-                                                    stub(:read => @results[:version][:output]),
-                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
     Open4.stubs(:popen4).with('.ci/update').yields(stub(),
                                                    stub(:close),
                                                    stub(:read => @results[:update][:output]),
                                                    stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
+    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
+                                                    stub(:close),
+                                                    stub(:read => @results[:version][:output]),
+                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
     Open4.stubs(:popen4).with('.ci/test').yields(stub(),
                                                  stub(:close),
                                                  stub(:read => @results[:test][:output]),
@@ -100,6 +105,12 @@ class CrazyIvanTest < Test::Unit::TestCase
       run_crazy_ivan
     end
   end
+  
+  # def test_report_in_progress_json_created
+  #   setup_crazy_ivan do
+  #     run_crazy_ivan
+  #   end
+  # end
   
   private
   
@@ -126,14 +137,14 @@ class CrazyIvanTest < Test::Unit::TestCase
   end
   
   def setup_external_scripts_to_all_be_successful
-    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
-                                                    stub(:close),
-                                                    stub(:read => @results[:version][:output]),
-                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
     Open4.stubs(:popen4).with('.ci/update').yields(stub(),
                                                    stub(:close),
                                                    stub(:read => @results[:update][:output]),
                                                    stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
+    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
+                                                    stub(:close),
+                                                    stub(:read => @results[:version][:output]),
+                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
     Open4.stubs(:popen4).with('.ci/test').yields(stub(),
                                                  stub(:close),
                                                  stub(:read => @results[:test][:output]),

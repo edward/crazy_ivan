@@ -5,18 +5,18 @@
 
 Gem::Specification.new do |s|
   s.name = %q{crazy_ivan}
-  s.version = "0.3.3"
+  s.version = "0.4.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edward Ocampo-Gooding"]
-  s.date = %q{2010-01-08}
+  s.date = %q{2010-01-09}
   s.default_executable = %q{crazy_ivan}
   s.description = %q{Continuous integration should really just be a script that captures the output of running your project update & test commands and presents recent results in a static html page.
 
     By keeping test reports in json, per-project CI configuration in 3 probably-one-line scripts, things are kept simple, quick, and super extensible.
 
     Want to use git, svn, or hg? No problem.
-    Need to fire off results to Campfire? It's one line away.
+    Need to fire off results to Campfire? It's built-in.
 
     CI depends on cron.}
   s.email = %q{edward@edwardog.net}
@@ -155,6 +155,20 @@ Gem::Specification.new do |s|
      "lib/crazy_ivan/vendor/json-1.1.7/tools/fuzz.rb",
      "lib/crazy_ivan/vendor/json-1.1.7/tools/server.rb",
      "lib/crazy_ivan/vendor/json.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/README",
+     "lib/crazy_ivan/vendor/open4-1.0.1/README.erb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/Rakefile",
+     "lib/crazy_ivan/vendor/open4-1.0.1/lib/open4.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/open4.gemspec",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/bg.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/block.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/exception.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/simple.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/spawn.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/stdin_timeout.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/samples/timeout.rb",
+     "lib/crazy_ivan/vendor/open4-1.0.1/white_box/leak.rb",
+     "lib/crazy_ivan/vendor/open4.rb",
      "lib/crazy_ivan/version.rb",
      "templates/css/ci.css",
      "templates/index.html",

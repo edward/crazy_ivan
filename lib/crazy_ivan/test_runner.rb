@@ -1,38 +1,22 @@
 require 'open3'
 
 class TestRunner
-  
-  # # REFACTOR this to just be a Hash
-  # class Result < Struct.new(:project_name, :version_output, :update_output, :test_output, :version_error, :update_error, :test_error, :exit_status, :timestamp)
-  #   def to_json
-  #     { "project_name" => project_name,
-  #       "version" => [version_error, version_output].join,
-  #       "timestamp" => timestamp,
-  #       "update" => update_output,
-  #       "update_error" => update_error,
-  #       "test" => test_output,
-  #       "test_error" => test_error,
-  #       "exit_status" => exit_status
-  #     }.to_json
-  #   end
-  # end
-  
   def initialize(project_path)
     @project_path = project_path
-    @results = {:project_name => '',
+    @results = {:project_name => File.basename(@project_path),
                 :version => {:output => '', :error => '', :exit_status => ''},
                 :update  => {:output => '', :error => '', :exit_status => ''},
                 :test    => {:output => '', :error => '', :exit_status => ''},
-                :timestamp => ''}
-                # :timestamp => {:start => '', :finish => ''}}
+                :timestamp => {:start => nil, :finish => nil}}
   end
+  
+  attr_reader :results
 
-  def valid?
+  def check_for_valid_scripts
     check_script('update')
     check_script('version')
     check_script('test')
     check_script('conclusion')
-    return true
   end
   
   def script_path(name)
@@ -73,7 +57,10 @@ class TestRunner
     return output.chomp, error.chomp, exit_status.to_s
   end
   
-  def run_conclusion
+  def run_conclusion_script
+    
+    # REFACTOR do this asynchronously so the next tests don't wait on running the conclusion
+    
     Dir.chdir(@project_path) do
       Syslog.debug "Passing report to conclusion script at #{script_path('conclusion')}"
       errors = ''
@@ -88,27 +75,49 @@ class TestRunner
     end
   end
   
-  def invoke
-    if valid?
-      @results[:project_name] = File.basename(@project_path)
-      
-      Syslog.info "Running tests for #{@results[:project_name]}"
-      
+  def start!
+    # REFACTOR to just report whichever scripts are invalid
+    check_for_valid_scripts
+    
+    @results[:timestamp][:start] = Time.now
+    Syslog.info "Starting CI for #{@results[:project_name]}"
+    
+    return @results
+  end
+    
+  def update!
+    Syslog.debug "Updating #{@results[:project_name]}"
+    @results[:update][:output], @results[:update][:error], @results[:update][:exit_status] = run_script('update')
+    
+    return @results
+  end
+  
+  def version!
+    if @results[:update][:exit_status] == '0'
+      Syslog.debug "Acquiring build version for #{@results[:project_name]}"
       @results[:version][:output], @results[:version][:error], @results[:version][:exit_status] = run_script('version')
-      
-      if @results[:version][:exit_status] == '0'
-        @results[:update][:output], @results[:update][:error], @results[:update][:exit_status] = run_script('update')
-        
-        if @results[:update][:exit_status] == '0'
-          @results[:test][:output], @results[:test][:error], @results[:test][:exit_status] = run_script('test')
-        end
-      end
-      
-      @results[:timestamp] = Time.now
-      
-      run_conclusion
-      
-      return @results
     end
+    
+    return @results
+  end
+  
+  def test!
+    if @results[:version][:exit_status] == '0'
+      Syslog.debug "Testing #{@results[:project_name]} build #{@results[:version][:output]}"
+      @results[:test][:output], @results[:test][:error], @results[:test][:exit_status] = run_script('test')
+    end
+    
+    @results[:timestamp][:finish] = Time.now
+    run_conclusion_script
+    
+    return @results
+  end
+  
+  def finished?
+    @results[:timestamp][:finish]
+  end
+  
+  def still_building?
+    !finished?
   end
 end

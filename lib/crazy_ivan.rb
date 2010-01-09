@@ -89,13 +89,27 @@ module CrazyIvan
     FileUtils.mkdir_p(output_directory)
     report = ReportAssembler.new(output_directory)
     
+    # REFACTOR to a single pass without this next weird bit where I grab results 
+    # because ReportAssembler#update_projects hasn't been refactored yet
+    
+    # Prep report directories, projects.json and the index
+    report.update_index
     Dir['*'].each do |dir|
       if File.directory?(dir)
-        report.test_results << TestRunner.new(dir).invoke
+        runner = TestRunner.new(dir)
+        report.test_results << runner.results
       end
     end
+    report.update_projects
+    report.test_results = []
     
-    report.generate
+    # Run the tests
+    Dir['*'].each do |dir|
+      if File.directory?(dir)
+        runner = TestRunner.new(dir)
+        report.generate_for(runner)
+      end
+    end
     
     msg = "Generated test reports for #{report.test_results.size} projects"
     Syslog.info(msg)
