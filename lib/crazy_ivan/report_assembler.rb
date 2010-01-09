@@ -32,12 +32,12 @@ class ReportAssembler
   end
   
   def update_project(result)
-    FileUtils.mkdir_p(result.project_name)
-    Dir.chdir(result.project_name) do
-      if result.version_error.empty?
-        filename = filename_from_version(result.version_output)
+    FileUtils.mkdir_p(result[:project_name])
+    Dir.chdir(result[:project_name]) do
+      if result[:version][:exit_status] == '0'
+        filename = filename_from_version(result[:version][:output])
       else
-        filename = filename_from_version(result.version_error)
+        filename = filename_from_version(result[:version][:error])
       end
       
       File.open("#{filename}.json", 'w+') do |f|
@@ -66,7 +66,7 @@ class ReportAssembler
   end
   
   def update_projects
-    projects = @test_results.map {|r| "#{r.project_name}"}
+    projects = @test_results.map {|r| "#{r[:project_name]}"}
     
     File.open('projects.json', 'w+') do |f|
       f.print({"projects" => projects}.to_json)

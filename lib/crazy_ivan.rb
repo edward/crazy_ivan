@@ -5,6 +5,7 @@ require 'crazy_ivan/test_runner'
 require 'crazy_ivan/html_asset_crush'
 require 'crazy_ivan/version'
 require 'crazy_ivan/vendor/json'
+require 'crazy_ivan/vendor/open4'
 
 module CrazyIvan
   def self.setup
