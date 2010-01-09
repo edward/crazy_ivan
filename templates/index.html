@@ -80,7 +80,7 @@
                   <div class='tests'>                                                                                                      \
                     {.section reports}                                                                                                     \
                       {.repeated section @}                                                                                                \
-                        <a class='test {.section test_error} error {.end} {.section update_error} error {.end}' href='#'>{timestamp}</a>   \
+                        <a class='test {.section test.error} error {.end} {.section update.error} error {.end}' href='#'>{timestamp}</a>   \
                       {.end}                                                                                                               \
                     {.end}                                                                                                                 \
                   </div>                                                                                                                   \
@@ -90,20 +90,20 @@
                         <div class='result'>                                                                                               \
                           <div>                                                                                                            \
                             <span class='timestamp'>{timestamp}</span>                                                                     \
-                            <span class='version'>{version}</span>                                                                         \
+                            <span class='version'>{version.output}</span>                                                                         \
                           </div>                                                                                                           \
                                                                                                                                            \
                           <div class='update'>                                                                                             \
-                            <pre>{update}</pre>                                                                                            \
-                            {.section update_error}                                                                                        \
-                              <pre class='error'>{update_error}</pre>                                                                      \
+                            <pre>{update.output}</pre>                                                                                            \
+                            {.section update.error}                                                                                        \
+                              <pre class='error'>{update.error}</pre>                                                                      \
                             {.end}                                                                                                         \
                           </div>                                                                                                           \
                                                                                                                                            \
                           <div class='test'>                                                                                               \
-                            <pre>{test}</pre>                                                                                              \
-                            {.section test_error}                                                                                          \
-                              <pre class='error'>{test_error}</pre>                                                                        \
+                            <pre>{test.output}</pre>                                                                                              \
+                            {.section test.error}                                                                                          \
+                              <pre class='error'>{test.error}</pre>                                                                        \
                             {.end}                                                                                                         \
                           </div>                                                                                                           \
                         </div>                                                                                                             \

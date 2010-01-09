@@ -70,12 +70,13 @@ class TestRunner
       exit_status = status.exitstatus
     end
     
-    return output.chomp, error.chomp, exit_status.chomp
+    return output.chomp, error.chomp, exit_status.to_s
   end
   
   def run_conclusion
     Dir.chdir(@project_path) do
       Syslog.debug "Passing report to conclusion script at #{script_path('conclusion')}"
+      errors = ''
       status = Open4.popen4(script_path('conclusion')) do |pid, stdin, stdout, stderr|
         stdin.puts @results.to_json
         stdin.close
