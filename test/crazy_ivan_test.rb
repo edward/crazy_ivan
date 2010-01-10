@@ -38,7 +38,7 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
-  # Does this test really work? I think it's wrong
+  # FIX Does this test really work? Doesn't look like it
   def test_external_scripts_not_overwritten
     setup_external_scripts_to_all_be_successful
     
@@ -50,7 +50,6 @@ class CrazyIvanTest < Test::Unit::TestCase
       FileUtils.copy('projects/some-project/.ci/version', 'projects/some-project/.ci/version_original')
       
       do_silently { CrazyIvan.setup }
-      
       assert FileUtils.compare_file('projects/some-project/.ci/version_original', 'projects/some-project/.ci/version')
     end
   end

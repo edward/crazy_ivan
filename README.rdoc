@@ -7,11 +7,11 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
   Create a directory where your projects will live
     $ mkdir /var/continuous-integration
   
-  Setup a project or two in that directory
+  Place some project(s) in that directory
     $ cd /var/continuous-integration
     $ git clone git://github.com/edward/active_merchant.git
   
-  Setup continuous-integration for each project
+  Set up continuous integration for each project
     $ crazy_ivan setup  # creates example ci scripts in 
                         # each project (see How this works)
     
@@ -48,7 +48,7 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
         of these dirs    /active_merchant
              ========>   /active_shipping
 
-    => within each directory, it expects three executable scripts
+    => within each directory, it expects four executable scripts
        to execute at the /:
        
           /shopify
@@ -56,6 +56,7 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
               update
               version
               test
+              conclusion
 
   * crazy_ivan first executes `update` and captures the output:
   
@@ -85,6 +86,9 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
   * At each of these three steps, the output is repackaged
     into a .json file to be consumed in the directory holding
     the static html.
+  
+  * crazy_ivan then executes `conclusion`, passing it the same results packaged
+    in the .json file used in the static html view.
 
 
 == Copyright and Credits
