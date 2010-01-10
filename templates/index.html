@@ -33,7 +33,7 @@
             return version_test_report(project_name, version);
           })
           
-          project = {name: project_name, reports: reports.reverse()};
+          project = {name: project_name, reports: reports.reverse(), build_in_progress: build_in_progress(project_name)};
           projects.push(project);
         })
         
@@ -64,6 +64,18 @@
         return report;
       }
       
+      var build_in_progress = function(project) {
+        var build_in_progress = {};
+        
+        new Ajax.Request(project + '/currently_building.json', {
+          asynchronous: false,
+          onSuccess: function(transport) {
+            build_in_progress = transport.responseText.evalJSON();
+          }
+        });
+        return build_in_progress;
+      }
+      
       var expand = function(element) {
         element.siblings().invoke('show');
         element.remove();
@@ -77,10 +89,15 @@
               {.repeated section @}                                                                                                        \
                 <div class='project'>                                                                                                      \
                   <h2>{name}</h2>                                                                                                          \
+                  {.section build_in_progress}                                                                                             \
+                    {.section timestamp}                                                                                                   \
+                      <div>[build in progress &ndash; started at {start}]</div>                                                            \
+                    {.end}                                                                                                                 \
+                  {.end}                                                                                                                   \
                   <div class='tests'>                                                                                                      \
                     {.section reports}                                                                                                     \
                       {.repeated section @}                                                                                                \
-                        <a class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp}</a>   \
+                        <a class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
                       {.end}                                                                                                               \
                     {.end}                                                                                                                 \
                   </div>                                                                                                                   \
@@ -89,7 +106,7 @@
                       {.repeated section @}                                                                                                \
                         <div class='result'>                                                                                               \
                           <div>                                                                                                            \
-                            <span class='timestamp'>{timestamp}</span>                                                                     \
+                            <span class='timestamp'>{timestamp.finish}</span>                                                              \
                             <span class='version'>{version.output}</span>                                                                  \
                           </div>                                                                                                           \
                                                                                                                                            \

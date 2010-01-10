@@ -77,6 +77,9 @@ class TestRunner
       Syslog.err(errors) if status.exitstatus != '0'
       Syslog.debug "Finished executing conclusion script"
     end
+    
+  rescue Errno::EPIPE
+    Syslog.err "Unknown issue in writing to conclusion script."
   end
   
   def start!

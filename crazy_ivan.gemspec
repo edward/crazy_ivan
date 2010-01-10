@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edward Ocampo-Gooding"]
-  s.date = %q{2010-01-09}
+  s.date = %q{2010-01-10}
   s.default_executable = %q{crazy_ivan}
   s.description = %q{Continuous integration should really just be a script that captures the output of running your project update & test commands and presents recent results in a static html page.
 
