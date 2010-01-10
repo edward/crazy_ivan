@@ -87,31 +87,11 @@ module CrazyIvan
   def self.generate_test_reports_in(output_directory)
     Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS)
     FileUtils.mkdir_p(output_directory)
-    report = ReportAssembler.new(output_directory)
     
-    # REFACTOR to a single pass without this next weird bit where I grab results 
-    # because ReportAssembler#update_projects hasn't been refactored yet
+    report = ReportAssembler.new(Dir.pwd, output_directory)
+    report.generate
     
-    # Prep report directories, projects.json and the index
-    report.update_index
-    Dir['*'].each do |dir|
-      if File.directory?(dir)
-        runner = TestRunner.new(dir)
-        report.test_results << runner.results
-      end
-    end
-    report.update_projects
-    report.test_results = []
-    
-    # Run the tests
-    Dir['*'].each do |dir|
-      if File.directory?(dir)
-        runner = TestRunner.new(dir)
-        report.generate_for(runner)
-      end
-    end
-    
-    msg = "Generated test reports for #{report.test_results.size} projects"
+    msg = "Generated test reports for #{report.runners.size} projects"
     Syslog.info(msg)
     puts msg
     # REFACTOR to use a logger that spits out to both STDOUT and Syslog

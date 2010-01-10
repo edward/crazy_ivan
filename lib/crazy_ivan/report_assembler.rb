@@ -3,29 +3,47 @@ class ReportAssembler
   ROOT_PATH = File.expand_path(File.dirname(__FILE__))
   TEMPLATES_PATH = File.join(ROOT_PATH, *%w[.. .. templates])
   
-  attr_accessor :test_results
+  attr_accessor :runners
   
-  def initialize(output_directory)
-    @test_results = []
+  def initialize(projects_directory, output_directory)
+    @runners = []
+    @projects_directory = projects_directory
     @output_directory = output_directory
   end
   
-  def generate_for(runner)
-    # Write the first version of the report with just the start time to currently_building.json
-    runner.start!
-    update_project(runner)
+  def generate
+    Dir.chdir(@projects_directory) do
+      Dir['*'].each do |dir|
+        if File.directory?(dir)
+          runners << TestRunner.new(File.join(@projects_directory, dir))
+        end
+      end
+    end
     
-    # Update the report in currently_building.json with the update output and error
-    runner.update!
-    update_project(runner)
-    
-    # Update the report in currently_building.json with the version output and error
-    runner.version!
-    update_project(runner)
-    
-    # Empty the currently_building.json and add to recents.json this new report with the test output and error
-    runner.test!
-    update_project(runner)
+    Dir.chdir(@output_directory) do
+      update_index
+      update_projects
+      
+      runners.each do |runner|
+        # REFACTOR to run this block in multiple threads to have multi-project testing
+      
+        # Write the first version of the report with just the start time to currently_building.json
+        runner.start!
+        update_project(runner)
+
+        # Update the report in currently_building.json with the update output and error
+        runner.update!
+        update_project(runner)
+
+        # Update the report in currently_building.json with the version output and error
+        runner.version!
+        update_project(runner)
+
+        # Empty the currently_building.json and add to recents.json this new report with the test output and error
+        runner.test!
+        update_project(runner)
+      end
+    end
   end
   
   def filename_from_version(string)
@@ -39,11 +57,13 @@ class ReportAssembler
   end
   
   def nullify_successful_exit_status_for_json_templates(results)
-    results[:version][:exit_status] = nil if results[:version][:exit_status] == '0'
-    results[:update][:exit_status] = nil if results[:version][:exit_status] == '0'
-    results[:test][:exit_status] = nil if results[:version][:exit_status] == '0'
+    filtered_results = YAML.load(results.to_yaml)
     
-    return results
+    filtered_results[:version][:exit_status] = nil if filtered_results[:version][:exit_status] == '0'
+    filtered_results[:update][:exit_status] = nil if filtered_results[:update][:exit_status] == '0'
+    filtered_results[:test][:exit_status] = nil if filtered_results[:test][:exit_status] == '0'
+    
+    return filtered_results
   end
   
   def flush_build_progress
@@ -73,6 +93,7 @@ class ReportAssembler
       end
       
       if runner.finished?
+        Syslog.debug "Runner is FINISHED"
         flush_build_progress
         update_recent(runner.results, filename)
       end
@@ -97,7 +118,7 @@ class ReportAssembler
   end
   
   def update_projects
-    projects = @test_results.map {|r| "#{r[:project_name]}"}
+    projects = @runners.map {|r| r.project_name }
     
     File.open('projects.json', 'w+') do |f|
       f.print({"projects" => projects}.to_json)

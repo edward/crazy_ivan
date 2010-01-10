@@ -7,7 +7,7 @@ class CrazyIvanTest < Test::Unit::TestCase
                 :version => {:output => 'a-valid-version', :error => '', :exit_status => '0'},
                 :update  => {:output => 'Updated successfully', :error => '', :exit_status => '0'},
                 :test    => {:output => 'Some valid test results. No fails.', :error => '', :exit_status => '0'},
-                :timestamp => ''}
+                :timestamp => {:start => Time.now, :finish => nil}}
   end
   
   def test_setup
@@ -27,6 +27,7 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert File.exists?('test-results/index.html')
       assert File.exists?('test-results/projects.json')
       assert File.exists?('test-results/some-project/recent.json')
+      assert File.exists?('test-results/some-project/currently_building.json')
       
       projects = JSON.parse(File.open('test-results/projects.json').read)["projects"]
       recent_versions = JSON.parse(File.open('test-results/some-project/recent.json').read)["recent_versions"]
@@ -91,8 +92,9 @@ class CrazyIvanTest < Test::Unit::TestCase
                                                  stub(:read => @results[:test][:output]),
                                                  stub(:read => @results[:test][:error])).returns(stub(:exitstatus => '0'))
     
-    @results[:timestamp] = Time.now
-    Time.stubs(:now => @results[:timestamp])
+    @results[:timestamp][:start] = Time.now
+    @results[:timestamp][:finish] = @results[:timestamp][:start]
+    Time.stubs(:now => @results[:timestamp][:start])
     
     fake_stdin = mock()
     

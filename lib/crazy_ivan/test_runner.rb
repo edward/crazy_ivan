@@ -11,6 +11,10 @@ class TestRunner
   end
   
   attr_reader :results
+  
+  def project_name
+    @results[:project_name]
+  end
 
   def check_for_valid_scripts
     check_script('update')
@@ -80,37 +84,31 @@ class TestRunner
     check_for_valid_scripts
     
     @results[:timestamp][:start] = Time.now
-    Syslog.info "Starting CI for #{@results[:project_name]}"
-    
-    return @results
+    Syslog.info "Starting CI for #{project_name}"
   end
     
   def update!
-    Syslog.debug "Updating #{@results[:project_name]}"
+    Syslog.debug "Updating #{project_name}"
     @results[:update][:output], @results[:update][:error], @results[:update][:exit_status] = run_script('update')
-    
-    return @results
   end
   
   def version!
     if @results[:update][:exit_status] == '0'
-      Syslog.debug "Acquiring build version for #{@results[:project_name]}"
+      Syslog.debug "Acquiring build version for #{project_name}"
       @results[:version][:output], @results[:version][:error], @results[:version][:exit_status] = run_script('version')
     end
-    
-    return @results
   end
   
   def test!
     if @results[:version][:exit_status] == '0'
       Syslog.debug "Testing #{@results[:project_name]} build #{@results[:version][:output]}"
       @results[:test][:output], @results[:test][:error], @results[:test][:exit_status] = run_script('test')
+    else
+      Syslog.debug "Failed to test #{project_name}; version exit status was #{@results[:version][:exit_status]}"
     end
     
     @results[:timestamp][:finish] = Time.now
     run_conclusion_script
-    
-    return @results
   end
   
   def finished?
