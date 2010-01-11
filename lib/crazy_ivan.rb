@@ -18,7 +18,7 @@ module CrazyIvan
         FileUtils.mkdir_p('.ci')
 
         Dir.chdir('.ci') do
-          puts "        #{dir}/.ci/update"
+          puts "        #{dir}/.ci"
           if File.exists?('version')
             puts "        #{' ' * (dir + "/.ci").size}/version already exists - skipping"
           else
@@ -93,14 +93,19 @@ module CrazyIvan
     
     puts "Take a look at those 4 scripts to make sure they each do the right thing."
     puts
-    puts "When you're ready, run the following from the projects directory (here):"
+    puts "When you're ready, run crazy_ivan manually from the projects directory (here):"
     puts
     puts "  crazy_ivan /path/to/directory/your/reports/go"
     puts
     puts "then look at index.html in that path to confirm that everything is ok."
     puts
-    puts "If things look good, then set up a cron task or other script to run"
+    puts "If things look good, then set up a cron job or other script to run"
     puts "crazy_ivan on a periodic basis."
+    puts
+    puts "To setup a cron job to run crazy_ivan every 15 minutes, do this:"
+    puts "  $ echo "0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci" > ci.cron"
+    puts "  $ crontab ci.cron"
+    puts
     puts
   end
 

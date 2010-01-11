@@ -21,7 +21,8 @@ begin
     gem.default_executable = "crazy_ivan"
     gem.files = FileList['.gitignore', '*.gemspec', 'lib/**/*', 'bin/*', 'templates/**/*', '[A-Z]*', 'test/**/*'].to_a
     
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    readme = File.read('README.rdoc')
+    gem.post_install_message = '\n' + readme[0...readme.index('== How this works')]
   end
   
   Jeweler::GemcutterTasks.new

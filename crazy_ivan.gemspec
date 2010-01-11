@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Edward Ocampo-Gooding"]
-  s.date = %q{2010-01-10}
+  s.date = %q{2010-01-11}
   s.default_executable = %q{crazy_ivan}
   s.description = %q{Continuous integration should really just be a script that captures the output of running your project update & test commands and presents recent results in a static html page.
 
@@ -185,6 +185,46 @@ Gem::Specification.new do |s|
      "test/test_helper.rb"
   ]
   s.homepage = %q{http://github.com/edward/crazy_ivan}
+  s.post_install_message = %q{= Crazy Ivan
+
+Crazy Ivan (CI) is simplest possible continuous integration tool.
+
+== Usage
+
+  Create a directory where your projects will live
+    $ mkdir /var/continuous-integration
+  
+  Place some project(s) in that directory
+    $ cd /var/continuous-integration
+    $ git clone git://github.com/edward/active_merchant.git
+  
+  Set up continuous integration for each project
+    $ crazy_ivan setup  # creates example ci scripts in 
+                        # each project (see How this works)
+    
+  
+  
+    $ crazy_ivan setup  # creates the ci directory, and
+                        # creates a configuration file,
+                        # sets a cron job to run crazy_ivan
+  
+  Manually run it once to check everything is ok
+    $ cd /var/continuous-integration
+    $ crazy_ivan /var/www/ci       # the test reports path should be
+                                   # accessible via your web server
+    
+    $ open /var/www/ci/index.html  # or check it through your browser
+  
+  Set a cron job to run it every 15 minutes
+    $ echo "0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci" > ci.cron
+    $ crontab ci.cron
+  
+  Note that you don’t want this running too frequently; having overlapping 
+  runs is possible and would be bad.
+  
+  (Functionality to have this run as a web-hook is planned.)
+
+}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.5}
