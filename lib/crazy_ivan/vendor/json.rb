@@ -1,10 +1,5 @@
-# Prefer gems to the bundled libs.
-require 'rubygems'
-
 begin
-  gem 'json', '~> 1.1.7'
+  require 'json'
 rescue LoadError
-  $:.unshift "#{File.dirname(__FILE__)}/json-1.1.7"
+  require 'crazy_ivan/vendor/json/json-1.1.7/lib/json'
 end
-
-require 'json'
