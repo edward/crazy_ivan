@@ -54,7 +54,7 @@ end
 
 desc "Install #{name} gem (#{version})"
 task :install => [ :test, :package ] do
-  sh %{gem install pkg/#{name}-#{version}.gem}
+  sh %{gem install pkg/#{name}-#{version}.gem --no-rdoc --no-ri}
 end
 
 desc "Uninstall #{name} gem"
