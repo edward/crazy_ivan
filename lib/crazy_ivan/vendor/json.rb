@@ -1,5 +1,6 @@
 begin
   require 'json'
 rescue LoadError
-  require 'crazy_ivan/vendor/json/json-1.1.7/lib/json'
+  $LOAD_PATH.unshift(File.dirname(__FILE__) + '/json-1.1.7/lib')
+  require 'json'
 end

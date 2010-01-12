@@ -3,11 +3,14 @@ require 'fileutils'
 require 'crazy_ivan/report_assembler'
 require 'crazy_ivan/test_runner'
 require 'crazy_ivan/html_asset_crush'
-require 'crazy_ivan/version'
+# require 'crazy_ivan/version'
 require 'crazy_ivan/vendor/json'
 require 'crazy_ivan/vendor/open4'
+require 'crazy_ivan/vendor/tmpdir'
 
 module CrazyIvan
+  VERSION = '1.0.0'
+  
   def self.setup
     puts
     puts "Preparing per-project continuous integration configuration scripts"
@@ -42,7 +45,7 @@ module CrazyIvan
               f.puts
               f.puts "# This script updates your code"
               f.puts "#"
-              f.puts "# If you can’t use a version control system, this script could just do some"
+              f.puts "# If you can't use a version control system, this script could just do some"
               f.puts "# some basic copying commands."
               f.puts
               f.puts "git pull"
@@ -103,7 +106,7 @@ module CrazyIvan
     puts "crazy_ivan on a periodic basis."
     puts
     puts "To setup a cron job to run crazy_ivan every 15 minutes, do this:"
-    puts "  $ echo "0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci" > ci.cron"
+    puts "  $ echo \"0,15,30,45 * * * * cd /var/continuous-integration; crazy_ivan /var/www/ci\" > ci.cron"
     puts "  $ crontab ci.cron"
     puts
     puts
