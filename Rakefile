@@ -9,8 +9,7 @@ require 'crazy_ivan'
 
 include FileUtils
 
-# version = CrazyIvan::VERSION
-version = "1.0.0"
+version = CrazyIvan::VERSION
 name = "crazy_ivan"
 
 spec = Gem::Specification.new do |s|

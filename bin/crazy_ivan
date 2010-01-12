@@ -1,16 +1,15 @@
 #!/usr/bin/env ruby
 
 begin
-  gem 'crazy_ivan'
+  require 'crazy_ivan'
 rescue LoadError
   # If people are not using gems, the load path must still
   # be correct.
   # TODO: Remove the begin / rescue block somehow
-  $:.unshift File.dirname(__FILE__) + '/../lib'
+  $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
   retry
 end
 
-require 'crazy_ivan'
 require "optparse"
 require "logger"
 

@@ -3,13 +3,13 @@ require 'fileutils'
 require 'crazy_ivan/report_assembler'
 require 'crazy_ivan/test_runner'
 require 'crazy_ivan/html_asset_crush'
-# require 'crazy_ivan/version'
+require 'crazy_ivan/version'
 require 'crazy_ivan/vendor/json'
 require 'crazy_ivan/vendor/open4'
 require 'crazy_ivan/vendor/tmpdir'
 
 module CrazyIvan
-  VERSION = '1.0.0'
+  # VERSION = '1.0.0'
   
   def self.setup
     puts
