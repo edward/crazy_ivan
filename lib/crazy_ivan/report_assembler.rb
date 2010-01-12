@@ -1,7 +1,6 @@
 class ReportAssembler
   MAXIMUM_RECENTS = 10
-  ROOT_PATH = File.expand_path(File.dirname(__FILE__))
-  TEMPLATES_PATH = File.join(ROOT_PATH, *%w[.. .. templates])
+  TEMPLATES_PATH = File.expand_path(File.dirname(__FILE__)) + '/templates'
   
   attr_accessor :runners
   
