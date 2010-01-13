@@ -10,6 +10,15 @@ class ReportAssembler
     @output_directory = File.expand_path(output_directory, projects_directory)
   end
   
+  def different_than_last_version?(runner)
+    project_path = File.join(@output_directory, runner.project_name)
+    
+    Dir.chdir(project_path) do
+      version = runner.results[:version][:output]
+      Dir["#{version}.json"].size == 0
+    end
+  end
+  
   def generate
     Dir.chdir(@projects_directory) do
       Dir['*'].each do |dir|
@@ -37,20 +46,21 @@ class ReportAssembler
         # Update the report in currently_building.json with the version output and error
         runner.version!
         update_project(runner)
-
-        # Empty the currently_building.json and add to recents.json this new report with the test output and error
-        runner.test!  # update_project will be called from within the runner to stream the test output
-        update_project(runner)
+        
+        if different_than_last_version?(runner)
+          # Empty the currently_building.json and add to recents.json this new report with the test output and error
+          runner.test!  # update_project will be called from within the runner to stream the test output
+          update_project(runner)
+        else
+          flush_build_progress(runner)
+          Syslog.debug("Already tested #{runner.project_name} version #{runner.results[:version][:output]} - skipping test")
+        end
       end
     end
   end
   
   def filename_from_version(string)
     s = string[0..240]
-    
-    if Dir["#{s}*.json"].size > 0
-      s += "-#{Dir["#{s}*.json"].size}"
-    end
     
     return s
   end
@@ -65,9 +75,13 @@ class ReportAssembler
     return filtered_results
   end
   
-  def flush_build_progress
-    File.open("currently_building.json", 'w+') do |f|
-      f.puts({}.to_json)
+  def flush_build_progress(runner)
+    project_results_path = File.join(@output_directory, runner.project_name)
+    
+    Dir.chdir(project_results_path) do
+      File.open("currently_building.json", 'w+') do |f|
+        f.puts({}.to_json)
+      end
     end
   end
   
@@ -93,7 +107,7 @@ class ReportAssembler
       
       if runner.finished?
         Syslog.debug "Runner is FINISHED"
-        flush_build_progress
+        flush_build_progress(runner)
         update_recent(runner.results, filename)
       end
     end
