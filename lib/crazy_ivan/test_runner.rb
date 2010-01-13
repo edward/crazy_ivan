@@ -1,11 +1,12 @@
 class TestRunner
-  def initialize(project_path)
+  def initialize(project_path, report_assembler)
     @project_path = project_path
     @results = {:project_name => File.basename(@project_path),
                 :version => {:output => '', :error => '', :exit_status => ''},
                 :update  => {:output => '', :error => '', :exit_status => ''},
                 :test    => {:output => '', :error => '', :exit_status => ''},
                 :timestamp => {:start => nil, :finish => nil}}
+    @report_assembler = report_assembler
   end
   
   attr_reader :results
@@ -41,7 +42,7 @@ class TestRunner
     end
   end
   
-  def run_script(name)
+  def run_script(name, options = {})
     output = ''
     error = ''
     exit_status = ''
@@ -49,8 +50,44 @@ class TestRunner
     Dir.chdir(@project_path) do
       status = Open4::popen4(script_path(name)) do |pid, stdin, stdout, stderr|
         stdin.close  # Close to prevent hanging if the script wants input
-        output = stdout.read
-        error = stderr.read
+        
+        stdout_not_done = true
+        stderr_not_done = true
+        
+        while stdout_not_done && stderr_not_done do
+          ready_io_streams = select( [stdout], nil, [stderr], 3600 )
+            
+          script_output = ready_io_streams[0].pop
+          script_error = ready_io_streams[2].pop
+          
+          if script_output
+            begin
+              output << stdout.readpartial(4096)
+              puts output
+              
+              if options[:stream_test_results?]
+                @results[:test][:output] = output
+                @report_assembler.update_project(self)
+              end
+            rescue EOFError
+              stdout_not_done = false
+            end
+          end
+          
+          if script_error
+            begin
+              error << stderr.readpartial(4096)
+              puts error
+              
+              if options[:stream_test_results?]
+                @results[:test][:error] = error
+                @report_assembler.update_project(self)
+              end
+            rescue
+              stderr_not_done = false
+            end
+          end
+        end
       end
       
       exit_status = status.exitstatus
@@ -103,7 +140,7 @@ class TestRunner
   def test!
     if @results[:version][:exit_status] == '0'
       Syslog.debug "Testing #{@results[:project_name]} build #{@results[:version][:output]}"
-      @results[:test][:output], @results[:test][:error], @results[:test][:exit_status] = run_script('test')
+      @results[:test][:output], @results[:test][:error], @results[:test][:exit_status] = run_script('test', :stream_test_results? => true)
     else
       Syslog.debug "Failed to test #{project_name}; version exit status was #{@results[:version][:exit_status]}"
     end

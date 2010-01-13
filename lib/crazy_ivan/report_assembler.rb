@@ -7,14 +7,14 @@ class ReportAssembler
   def initialize(projects_directory, output_directory)
     @runners = []
     @projects_directory = projects_directory
-    @output_directory = output_directory
+    @output_directory = File.expand_path(output_directory, projects_directory)
   end
   
   def generate
     Dir.chdir(@projects_directory) do
       Dir['*'].each do |dir|
         if File.directory?(dir)
-          runners << TestRunner.new(File.join(@projects_directory, dir))
+          runners << TestRunner.new(File.join(@projects_directory, dir), self)
         end
       end
     end
@@ -39,7 +39,7 @@ class ReportAssembler
         update_project(runner)
 
         # Empty the currently_building.json and add to recents.json this new report with the test output and error
-        runner.test!
+        runner.test!  # update_project will be called from within the runner to stream the test output
         update_project(runner)
       end
     end
@@ -73,7 +73,7 @@ class ReportAssembler
   
   def update_project(runner)
     FileUtils.mkdir_p(runner.project_name)
-    Dir.chdir(runner.project_name) do
+    Dir.chdir(File.expand_path(runner.project_name, @output_directory)) do
       
       filename = ''
       

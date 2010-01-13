@@ -5,17 +5,6 @@
   then ask them about the git or svn repository. Do a friendly wizard thing with nice colours.
   This should be as nice as Phusion’s thing.
 
-* TestRunner#run_script should warn or complain on empty scripts or on scripts that do not return output
-
-* Think about using popen4 instead (fixes exit status code issue with popen3)
-
-* What about making all setup just be:
-
-  $ ci install [/var/continuous-integration]
-  # Defaults to creating ^^^ and prompting for each project somehow
-
-* Needs more logging; should log to system when running each project
-
 * Add a 'periscope' web-hook with rack to run tests.
 
 * Come up with a better executable name ("ci" is taken by RCS)
@@ -35,5 +24,3 @@
 * Write a man page with Ron: http://github.com/rtomayko/ron
 
 * Refactor and document Syslog to have method names that actually match the syslog levels (like #error instead of #err )
-
-* Don't overwrite existing config files and warn when skipping
