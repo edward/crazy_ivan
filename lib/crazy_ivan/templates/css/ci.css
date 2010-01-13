@@ -20,11 +20,11 @@ pre { margin: 0;}
 .tests .test { font-size: 80%; margin-right: 8px;}
 .tests .latest { font-size: 100%;}
 
-.results .result { margin: 12px 18px 8px 18px;}
 .results .result .timestamp { margin-right: 12px;}
 .results .result .version { margin: 6px 0 6px 12px }
-.results .result .update { margin: 6px 0 6px 12px }
-.results .result .test { margin: 6px 0 6px 12px }
+.results .result .output { padding: 5px; color: silver; background:black; margin: 12px 18px 8px 18px;}
+.results .result .output .update { margin: 6px 0 6px 12px }
+.results .result .output .test { margin: 6px 0 6px 12px }
 
 .footer { 
   margin: 24px 0 0 0;
