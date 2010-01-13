@@ -70,8 +70,8 @@ class CrazyIvan::ProcessManager
   end
 
   def self.lock_exclusively!
-    pid = Integer(File.read(PidFile))
-    File.open('/tmp/ci.pid', "w+") { |fp| fp << Process.pid }
+    pid = Integer(File.read(PidFile)) if File.exists?(PidFile)
+    File.open('/tmp/crazy_ivan.pid', "w+") { |fp| fp << Process.pid }
     
     if ci_already_running?
       Process.kill("INT", pid)
