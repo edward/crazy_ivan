@@ -1,5 +1,3 @@
-require 'open3'
-
 class TestRunner
   def initialize(project_path)
     @project_path = project_path
