@@ -13,6 +13,17 @@
     <script type="text/javascript">
       var init = function() {
         render('index.jsont', projects());
+        // $$('.results').invoke('hide')
+        new PeriodicalExecuter(render_projects, 1);
+      }
+      
+      var show_reports = false;
+      
+      var render_projects = function() {
+        render('index.jsont', projects());
+        if(!show_reports) {
+          $$('.results').invoke('hide');
+        }
       }
       
       var projects = function() {
@@ -33,7 +44,16 @@
             return version_test_report(project_name, version);
           })
           
-          project = {name: project_name, reports: reports.reverse(), build_in_progress: build_in_progress(project_name)};
+          var project = {name: project_name, reports: reports.reverse()};
+          
+          var progress_report = build_in_progress(project_name);
+          if(progress_report.timestamp) {
+            minutes_started_ago = Math.floor(((new Date() - Date.parse(progress_report.timestamp.start)) / 1000) / 60);
+            progress_report['minutes_started_ago'] = minutes_started_ago;
+                        
+            project['build_in_progress'] = progress_report;
+          }
+          
           projects.push(project);
         })
         
@@ -89,18 +109,49 @@
               {.repeated section @}                                                                                                        \
                 <div class='project'>                                                                                                      \
                   <h2>{name}</h2>                                                                                                          \
-                  {.section build_in_progress}                                                                                             \
-                    {.section timestamp}                                                                                                   \
-                      <div>[build in progress &ndash; started at {start}]</div>                                                            \
-                    {.end}                                                                                                                 \
-                  {.end}                                                                                                                   \
                   <div class='tests'>                                                                                                      \
                     {.section reports}                                                                                                     \
                       {.repeated section @}                                                                                                \
                         <a class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
                       {.end}                                                                                                               \
                     {.end}                                                                                                                 \
+                    {.section build_in_progress}                                                                                             \
+                      <div>Build {.section version}{output} {.end} in progress &ndash; started {minutes_started_ago} minutes(s) ago</div>   \
+                    {.end}                                                                                                                   \
                   </div>                                                                                                                   \
+                  {.section build_in_progress}                                                                                             \
+                    <div class='build-in-progress'>                                                                                        \
+                      <div class='result'>                                                                                                 \
+                        <div class='output'>                                                                                             \
+                          {.section version}                                                                                             \
+                            {.section exit_status}                                                                                       \
+                              <div class='version'>                                                                                      \
+                                <pre class='error'>{error}</pre>                                                                         \
+                              </div>                                                                                                     \
+                            {.end}                                                                                                       \
+                          {.end}                                                                                                         \
+                                                                                                                                         \
+                          <div class='update'>                                                                                           \
+                            <pre>{update.output}</pre>                                                                                   \
+                            {.section update}                                                                                            \
+                              {.section exit_status}                                                                                     \
+                                <pre class='error'>{update.error}</pre>                                                                  \
+                              {.end}                                                                                                     \
+                            {.end}                                                                                                       \
+                          </div>                                                                                                         \
+                                                                                                                                         \
+                          <div class='test'>                                                                                             \
+                            <pre>{test.output}</pre>                                                                                     \
+                            {.section test}                                                                                              \
+                              {.section exit_status}                                                                                     \
+                                <pre class='error'>{test.error}</pre>                                                                    \
+                              {.end}                                                                                                     \
+                            {.end}                                                                                                       \
+                          </div>                                                                                                         \
+                        </div>                                                                                                           \
+                      </div>                                                                                                             \
+                    </div>                                                                                                                 \
+                  {.end}                                                                                                                   \
                   <div class='results'>                                                                                                    \
                     {.section reports}                                                                                                     \
                       {.repeated section @}                                                                                                \
@@ -154,22 +205,19 @@
         var html = template.expand(json);
         $("replace").update(html);
         
-        
         $$('.project .tests').each(function(t) {
           t.down('.test').addClassName('latest')
         });
         
-        // Reformat the test timestamps to be less enormous
+        // Reformat the test timestamps to be less enormous and open up on clicking
         $$('.project .tests .test').each(function(t) {
           t.update(Date.parse(t.innerHTML).toString("HH:mm"));
           t.observe('click', function(e) {
-            console.debug("hallo");
-            $$('.results').invoke('show')
+            $$('.results').invoke('show');
+            show_reports = true;
             return false;
           });
         });
-        
-        $$('.results').invoke('hide')
       }
     </script>
   </head>
