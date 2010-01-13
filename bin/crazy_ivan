@@ -13,7 +13,15 @@ end
 require "optparse"
 require "logger"
 
-Signal.trap("INT") { puts; exit }
+Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS)
+
+Signal.trap("INT") do
+  Syslog.debug("Interrupted - Now dropping a note in the test output and exiting.")
+  CrazyIvan.interrupt_test
+  CrazyIvan::ProcessManager.unlock
+  puts
+  exit
+end
 
 def show_howto
   puts "Hankering for a continuous integration server, eh?"
@@ -44,6 +52,35 @@ end
 
 options = {}
 
+
+class CrazyIvan::ProcessManager
+  PidFile = '/tmp/crazy_ivan.pid'
+  
+  def self.acquire_lock
+    lock_exclusively!
+    yield
+  end
+  
+  def self.unlock
+    File.new(PidFile).flock(File::LOCK_UN)
+  end
+
+  def self.ci_already_running?
+    File.exists?(PidFile) && !File.new(PidFile).flock(File::LOCK_EX | File::LOCK_NB)
+  end
+
+  def self.lock_exclusively!
+    pid = Integer(File.read(PidFile))
+    File.open('/tmp/ci.pid', "w+") { |fp| fp << Process.pid }
+    
+    if ci_already_running?
+      Process.kill("INT", pid)
+      Syslog.debug("Detected another running CI process #{pid}; interrupting it and starting myself")
+      File.new(PidFile).flock(File::LOCK_EX)
+    end
+  end
+end
+
 ARGV.options do |opts|
   opts.banner = "Usage:  #{File.basename($PROGRAM_NAME)} test_reports_path"
   
@@ -60,15 +97,18 @@ ARGV.options do |opts|
   
   begin
     opts.parse!
-    
+        
     case ARGV[0]
     when /setup/
       CrazyIvan::setup
     when /\w+/  # a directory for test results
-      CrazyIvan::generate_test_reports_in(ARGV[0])
+      CrazyIvan::ProcessManager.acquire_lock do      
+        CrazyIvan::generate_test_reports_in(ARGV[0])
+      end
     else
       show_howto
       exit
     end
   end
 end
+

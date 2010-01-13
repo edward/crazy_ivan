@@ -113,7 +113,7 @@ module CrazyIvan
   end
 
   def self.generate_test_reports_in(output_directory)
-    Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS)
+    Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS) unless Syslog.opened?
     FileUtils.mkdir_p(output_directory)
     
     report = ReportAssembler.new(Dir.pwd, output_directory)
@@ -125,5 +125,9 @@ module CrazyIvan
     # REFACTOR to use a logger that spits out to both STDOUT and Syslog
   ensure
     Syslog.close
+  end
+  
+  def self.interrupt_test
+    # TODO add a message to the running report generator about the test being interrupted and clear the building json
   end
 end
