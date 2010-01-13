@@ -35,8 +35,7 @@ spec = Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.has_rdoc = false
   
-  # s.files = Dir.glob("{bin,lib}/**/*")
-  s.files = FileList['.gitignore', '*.gemspec', 'lib/**/*', 'bin/*', 'templates/**/*', '[A-Z]*', 'test/**/*'].to_a
+  s.files = Dir.glob("{bin,lib}/**/*") + FileList['LICENSE', 'README.rdoc'].to_a
   
   s.require_path = "lib"
   s.bindir = "bin"
