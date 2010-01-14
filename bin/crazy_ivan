@@ -68,15 +68,28 @@ class CrazyIvan::ProcessManager
   def self.ci_already_running?
     File.exists?(PidFile) && !File.new(PidFile).flock(File::LOCK_EX | File::LOCK_NB)
   end
-
-  def self.lock_exclusively!
+  
+  def self.lock_exclusively!(options = {})
     pid = Integer(File.read(PidFile)) if File.exists?(PidFile)
-    File.open('/tmp/crazy_ivan.pid', "w+") { |fp| fp << Process.pid }
     
-    if ci_already_running?
-      Process.kill("INT", pid)
-      Syslog.debug("Detected another running CI process #{pid}; interrupting it and starting myself")
-      File.new(PidFile).flock(File::LOCK_EX)
+    if options[:interrupt_existing_process]
+      File.open(PidFile, "w+") { |fp| fp << Process.pid }
+
+      if ci_already_running?
+        Process.kill("INT", pid)
+        Syslog.debug("Detected another running CI process #{pid}; interrupting it and starting myself")
+        File.new(PidFile).flock(File::LOCK_EX)
+      end
+    else
+      if ci_already_running?
+        msg = "Detected another running CI process #{pid} - terminating myself"
+        Syslog.warning msg
+        puts msg
+        Process.kill("INT", 0)
+      else
+        File.open(PidFile, "w+") { |fp| fp << Process.pid }
+        File.new(PidFile).flock(File::LOCK_EX)
+      end
     end
   end
 end
@@ -102,7 +115,9 @@ ARGV.options do |opts|
     when /setup/
       CrazyIvan::setup
     when /\w+/  # a directory for test results
-      CrazyIvan::ProcessManager.acquire_lock do      
+      Syslog.debug "Acquiring lock"
+      CrazyIvan::ProcessManager.acquire_lock do
+        Syslog.debug "Generating reports in #{ARGV[0]}"
         CrazyIvan::generate_test_reports_in(ARGV[0])
       end
     else
