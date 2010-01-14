@@ -93,4 +93,4 @@ Campfire.basic_auth ARGV[1], 'x'
 
 campfire_room_id = campfire_url.path[/\d+/]
 campfire_room = Campfire.room(campfire_room_id)
-campfire_room.message "#{report['project_name']} broke. Please take a look at #{ARGV[2]}"
+campfire_room.message "#{report['project_name']} #{report['version']['output']} broke. Please take a look at #{ARGV[2]}"
