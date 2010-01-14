@@ -16,14 +16,14 @@ module CrazyIvan
     puts "Preparing per-project continuous integration configuration scripts"
     puts
     
-    Dir['*'].each do |dir|
+    Dir['*/'].each do |dir|
       Dir.chdir(dir) do
         FileUtils.mkdir_p('.ci')
 
         Dir.chdir('.ci') do
-          puts "        #{dir}/.ci"
+          puts "         #{dir}.ci"
           if File.exists?('version')
-            puts "      #{' ' * (dir + "/.ci").size}/version already exists - skipping"
+            puts "        #{' ' * (dir + "/.ci").size}/version already exists - skipping"
           else
             File.open('version', 'w+') do |f|
               f.puts "#!/usr/bin/env ruby"
@@ -34,11 +34,11 @@ module CrazyIvan
               f.puts
               f.puts "puts `git show`[/^commit (.+)$/, 1]"
             end
-            puts "      #{' ' * (dir + "/.ci").size}/version -- created"
+            puts "        #{' ' * (dir + ".ci").size}/version -- created"
           end
           
           if File.exists?('update')
-            puts "      #{' ' * (dir + "/.ci").size}/update already exists - skipping"
+            puts "        #{' ' * (dir + "/.ci").size}/update already exists - skipping"
           else
             File.open('update', 'w+') do |f|
               f.puts "#!/usr/bin/env bash"
@@ -50,11 +50,11 @@ module CrazyIvan
               f.puts
               f.puts "git pull"
             end
-            puts "      #{' ' * (dir + "/.ci").size}/update -- created"
+            puts "        #{' ' * (dir + ".ci").size}/update -- created"
           end
 
           if File.exists?('test')
-            puts "        #{' ' * (dir + "/.ci").size}/test already exists -- skipping"
+            puts "         #{' ' * (dir + ".ci").size}/test already exists -- skipping"
           else
             File.open('test', 'w+') do |f|
               f.puts "#!/usr/bin/env bash"
@@ -64,11 +64,11 @@ module CrazyIvan
               f.puts
               f.puts "rake"
             end
-            puts "      #{' ' * (dir + "/.ci").size}/test -- created"
+            puts "         #{' ' * (dir + ".ci").size}/test -- created"
           end
           
           if File.exists?('conclusion')
-            puts "      #{' ' * (dir + "/.ci").size}/conclusion already exists -- skipping"
+            puts "         #{' ' * (dir + ".ci").size}/conclusion already exists -- skipping"
           else
             File.open('conclusion', 'w+') do |f|
               f.puts "#!/usr/bin/env ruby"
@@ -85,7 +85,7 @@ module CrazyIvan
               f.puts "# IO.popen(\"test_report2campfire \#{CAMPFIRE_ROOM_URL} \#{CAMPFIRE_API_KEY} \#{CRAZY_IVAN_REPORTS_URL}\", 'w') {|f| f.puts STDIN.read }"
               f.puts
             end
-            puts "      #{' ' * (dir + "/.ci").size}/conclusion -- created"
+            puts "         #{' ' * (dir + ".ci").size}/conclusion -- created"
           end
           puts
 
