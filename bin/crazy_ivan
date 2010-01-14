@@ -16,7 +16,8 @@ require "logger"
 Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS)
 
 Signal.trap("INT") do
-  Syslog.debug("Interrupted - Now dropping a note in the test output and exiting.")
+  # Syslog.debug("Interrupted - Now dropping a note in the test output and exiting.")
+  Syslog.debug("Interrupted - exiting.")
   CrazyIvan.interrupt_test
   CrazyIvan::ProcessManager.unlock
   puts
