@@ -32,12 +32,18 @@ class TestRunner
     Dir.chdir(@project_path) do
       if File.exists?(script_path)
         if !File.stat(script_path).executable?
-          abort "#{@project_path}/.ci/#{name} script not executable"
+          msg = "#{@project_path}/.ci/#{name} script not executable"
+          Syslog.warning msg
+          abort msg
         elsif File.open(script_path).read.empty?
-          abort "#{@project_path}/.ci/#{name} script empty"
+          msg = "#{@project_path}/.ci/#{name} script empty"
+          Syslog.warning msg
+          abort msg
         end
       else
-        abort "#{@project_path}/.ci/#{name} script missing"
+        msg = "#{@project_path}/.ci/#{name} script missing"
+        Syslog.warning msg
+        abort msg
       end
     end
   end
