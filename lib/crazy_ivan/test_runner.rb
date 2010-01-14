@@ -83,7 +83,7 @@ class TestRunner
                 @results[:test][:error] = error
                 @report_assembler.update_project(self)
               end
-            rescue
+            rescue EOFError
               stderr_not_done = false
             end
           end
