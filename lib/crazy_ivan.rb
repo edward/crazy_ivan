@@ -78,7 +78,7 @@ module CrazyIvan
               f.puts "# If you're interested in bouncing the message to campfire, "
               f.puts "# emailing, or otherwise sending notifications, this is the place to do it."
               f.puts
-              f.puts "# To enable campfire notifications, uncomment the next lines:"
+              f.puts "# To enable campfire notifications, uncomment the next lines and make sure you have the httparty gem installed:"
               f.puts "# CAMPFIRE_ROOM_URL = 'http://your-company.campfirenow.com/room/265250'"
               f.puts "# CAMPFIRE_API_KEY = '23b8al234gkj80a3e372133l4k4j34275f80ef8971'"
               f.puts "# CRAZY_IVAN_REPORTS_URL = 'http://ci.your-projects.com'"
@@ -100,7 +100,10 @@ module CrazyIvan
     puts
     puts "  crazy_ivan /path/to/directory/your/reports/go"
     puts
-    puts "then look at index.html in that path to confirm that everything is ok."
+    puts "then look at index.html in that path to confirm that everything is ok. "
+    puts
+    puts "To force a re-run of the same build version of a project, delete its test "
+    puts "results directory from the /path/to/directory/your/reports/go"
     puts
     puts "If things look good, then set up a cron job or other script to run"
     puts "crazy_ivan on a periodic basis."
