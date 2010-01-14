@@ -60,6 +60,7 @@ class CrazyIvan::ProcessManager
   def self.acquire_lock
     lock_exclusively!
     yield
+    unlock
   end
   
   def self.unlock
@@ -72,6 +73,8 @@ class CrazyIvan::ProcessManager
   
   def self.lock_exclusively!(options = {})
     pid = Integer(File.read(PidFile)) if File.exists?(PidFile)
+    
+    Syslog.debug "Acquiring lock"
     
     if options[:interrupt_existing_process]
       File.open(PidFile, "w+") { |fp| fp << Process.pid }
@@ -88,8 +91,9 @@ class CrazyIvan::ProcessManager
         puts msg
         Process.kill("INT", 0)
       else
+        Syslog.debug("Locked CI process pid file")
+        Syslog.debug("Writing to pid file with #{Process.pid}")
         File.open(PidFile, "w+") { |fp| fp << Process.pid }
-        File.new(PidFile).flock(File::LOCK_EX)
       end
     end
   end
@@ -116,7 +120,6 @@ ARGV.options do |opts|
     when /setup/
       CrazyIvan::setup
     when /\w+/  # a directory for test results
-      Syslog.debug "Acquiring lock"
       CrazyIvan::ProcessManager.acquire_lock do
         Syslog.debug "Generating reports in #{ARGV[0]}"
         CrazyIvan::generate_test_reports_in(ARGV[0])
