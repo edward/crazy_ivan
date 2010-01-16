@@ -54,45 +54,35 @@ class TestRunner
     exit_status = ''
     
     Dir.chdir(@project_path) do
+      Syslog.debug "Opening up the pipe to #{script_path(name)}"
+      
       status = Open4::popen4(script_path(name)) do |pid, stdin, stdout, stderr|
         stdin.close  # Close to prevent hanging if the script wants input
         
-        stdout_not_done = true
-        stderr_not_done = true
-        
-        while stdout_not_done && stderr_not_done do
-          ready_io_streams = select( [stdout], nil, [stderr], 3600 )
-            
+        until stdout.eof? && stderr.eof? do
+          ready_io_streams = IO.select( [stdout], nil, [stderr], 3600 )
+          Syslog.debug "Got back #{ready_io_streams.inspect}"
+          
           script_output = ready_io_streams[0].pop
           script_error = ready_io_streams[2].pop
           
-          if script_output
-            begin
-              new_output = stdout.readpartial(4096)
-              output << new_output
-              print new_output
-              
-              if options[:stream_test_results?]
-                @results[:test][:output] = output
-                @report_assembler.update_project(self)
-              end
-            rescue EOFError
-              stdout_not_done = false
+          if script_output && !script_output.eof?
+            output << script_output.readpartial(4096)
+            puts output
+            
+            if options[:stream_test_results?]
+              @results[:test][:output] = output
+              @report_assembler.update_project(self)
             end
           end
           
-          if script_error
-            begin
-              new_error = stderr.readpartial(4096)
-              error << new_error
-              print error
-              
-              if options[:stream_test_results?]
-                @results[:test][:error] = error
-                @report_assembler.update_project(self)
-              end
-            rescue EOFError
-              stderr_not_done = false
+          if script_error && !script_error.eof?
+            error << script_error.readpartial(4096)
+            puts error
+            
+            if options[:stream_test_results?]
+              @results[:test][:error] = error
+              @report_assembler.update_project(self)
             end
           end
         end
@@ -105,7 +95,6 @@ class TestRunner
   end
   
   def run_conclusion_script
-    
     # REFACTOR do this asynchronously so the next tests don't wait on running the conclusion
     
     Dir.chdir(@project_path) do

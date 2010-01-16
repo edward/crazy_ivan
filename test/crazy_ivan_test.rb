@@ -37,81 +37,87 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert_equal 'a-valid-version', recent_versions.first
     end
   end
-  
-  # FIX Does this test really work? Doesn't look like it
-  def test_external_scripts_not_overwritten
-    setup_external_scripts_to_all_be_successful
-    
-    setup_crazy_ivan do
-      File.open('projects/some-project/.ci/version', 'a') do |file|
-        file << "a change to the script"
-      end
-
-      FileUtils.copy('projects/some-project/.ci/version', 'projects/some-project/.ci/version_original')
-      
-      do_silently { CrazyIvan.setup }
-      assert FileUtils.compare_file('projects/some-project/.ci/version_original', 'projects/some-project/.ci/version')
-    end
-  end
-  
-  def test_nil_reports_not_created
-    Open4.stubs(:popen4).with('.ci/update').yields(stub(),
-                                                   stub(:close),
-                                                   stub(:read => @results[:update][:output]),
-                                                   stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
-    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
-                                                    stub(:close),
-                                                    stub(:read => ''),
-                                                    stub(:read => 'could not find the command you were looking for')).returns(stub(:exitstatus => '1'))
-    Open4.stubs(:popen4).with('.ci/conclusion').yields(stub(),
-                                                       stub(:puts => true, :close => true),
-                                                       stub(),
-                                                       stub(:read => '')).returns(stub(:exitstatus => '0'))
-    
-    setup_crazy_ivan do
-      Dir.chdir('projects') do
-        do_silently { CrazyIvan.generate_test_reports_in('../test-results') }
-      end
-      
-      assert !File.exists?('test-results/some-project/nil.json')
-    end
-  end
-  
-  def test_conclusion_executed
-    Open4.stubs(:popen4).with('.ci/update').yields(stub(),
-                                                   stub(:close),
-                                                   stub(:read => @results[:update][:output]),
-                                                   stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
-    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
-                                                    stub(:close),
-                                                    stub(:read => @results[:version][:output]),
-                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
-    Open4.stubs(:popen4).with('.ci/test').yields(stub(),
-                                                 stub(:close),
-                                                 stub(:read => @results[:test][:output]),
-                                                 stub(:read => @results[:test][:error])).returns(stub(:exitstatus => '0'))
-    
-    @results[:timestamp][:start] = Time.now
-    @results[:timestamp][:finish] = @results[:timestamp][:start]
-    Time.stubs(:now => @results[:timestamp][:start])
-    
-    fake_stdin = mock()
-    
-    fake_stdin.expects(:puts).with(@results.to_json).at_least_once
-    fake_stdin.expects(:close)
-    
-    Open4.stubs(:popen4).with('.ci/conclusion').yields(stub(), fake_stdin, stub(), stub(:read => '')).returns(stub(:exitstatus => '0'))
-    
-    setup_crazy_ivan(false) do
-      run_crazy_ivan
-    end
-  end
-  
-  # def test_report_in_progress_json_created
+  # 
+  # # FIX Does this test really work? Doesn't look like it
+  # def test_external_scripts_not_overwritten
+  #   setup_external_scripts_to_all_be_successful
+  #   
   #   setup_crazy_ivan do
+  #     File.open('projects/some-project/.ci/version', 'a') do |file|
+  #       file << "a change to the script"
+  #     end
+  # 
+  #     FileUtils.copy('projects/some-project/.ci/version', 'projects/some-project/.ci/version_original')
+  #     
+  #     do_silently { CrazyIvan.setup }
+  #     assert FileUtils.compare_file('projects/some-project/.ci/version_original', 'projects/some-project/.ci/version')
+  #   end
+  # end
+  # 
+  # def test_nil_reports_not_created
+  #   Open4.stubs(:popen4).with('.ci/update').yields(11111,
+  #                                                  dummy_io.stubs(:close),
+  #                                                  dummy_io.stubs(:read => @results[:update][:output]),
+  #                                                  dummy_io.stubs(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
+  #   
+  #   
+  #   # Open4.stubs(:popen4).with('.ci/update').yields(stub(),
+  #   #                                                stub(:close),
+  #   #                                                stub(:read => @results[:update][:output]),
+  #   #                                                stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
+  #   Open4.stubs(:popen4).with('.ci/version').yields(stub(),
+  #                                                   stub(:close),
+  #                                                   stub(:read => ''),
+  #                                                   stub(:read => 'could not find the command you were looking for')).returns(stub(:exitstatus => '1'))
+  #   Open4.stubs(:popen4).with('.ci/conclusion').yields(stub(),
+  #                                                      stub(:puts => true, :close => true),
+  #                                                      stub(),
+  #                                                      stub(:read => '')).returns(stub(:exitstatus => '0'))
+  #   
+  #   setup_crazy_ivan do
+  #     Dir.chdir('projects') do
+  #       do_silently { CrazyIvan.generate_test_reports_in('../test-results') }
+  #     end
+  #     
+  #     assert !File.exists?('test-results/some-project/nil.json')
+  #   end
+  # end
+  # 
+  # def test_conclusion_executed
+  #   Open4.stubs(:popen4).with('.ci/update').yields(stub(),
+  #                                                  stub(:close),
+  #                                                  stub(:read => @results[:update][:output]),
+  #                                                  stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
+  #   Open4.stubs(:popen4).with('.ci/version').yields(stub(),
+  #                                                   stub(:close),
+  #                                                   stub(:read => @results[:version][:output]),
+  #                                                   stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
+  #   Open4.stubs(:popen4).with('.ci/test').yields(stub(),
+  #                                                stub(:close),
+  #                                                stub(:read => @results[:test][:output]),
+  #                                                stub(:read => @results[:test][:error])).returns(stub(:exitstatus => '0'))
+  #   
+  #   @results[:timestamp][:start] = Time.now
+  #   @results[:timestamp][:finish] = @results[:timestamp][:start]
+  #   Time.stubs(:now => @results[:timestamp][:start])
+  #   
+  #   fake_stdin = mock()
+  #   
+  #   fake_stdin.expects(:puts).with(@results.to_json).at_least_once
+  #   fake_stdin.expects(:close)
+  #   
+  #   Open4.stubs(:popen4).with('.ci/conclusion').yields(stub(), fake_stdin, stub(), stub(:read => '')).returns(stub(:exitstatus => '0'))
+  #   
+  #   setup_crazy_ivan(false) do
   #     run_crazy_ivan
   #   end
   # end
+  # 
+  # # def test_report_in_progress_json_created
+  # #   setup_crazy_ivan do
+  # #     run_crazy_ivan
+  # #   end
+  # # end
   
   private
   
@@ -137,23 +143,39 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
-  def setup_external_scripts_to_all_be_successful
-    Open4.stubs(:popen4).with('.ci/update').yields(stub(),
-                                                   stub(:close),
-                                                   stub(:read => @results[:update][:output]),
-                                                   stub(:read => @results[:update][:error])).returns(stub(:exitstatus => '0'))
-    Open4.stubs(:popen4).with('.ci/version').yields(stub(),
-                                                    stub(:close),
-                                                    stub(:read => @results[:version][:output]),
-                                                    stub(:read => @results[:version][:error])).returns(stub(:exitstatus => '0'))
-    Open4.stubs(:popen4).with('.ci/test').yields(stub(),
-                                                 stub(:close),
-                                                 stub(:read => @results[:test][:output]),
-                                                 stub(:read => @results[:test][:error])).returns(stub(:exitstatus => '0'))
+  def fresh_ios_for(script)
+    script = script.to_sym
     
-    Open4.stubs(:popen4).with('.ci/conclusion').yields(stub(),
-                                                       stub(:puts => true, :close => true),
-                                                       stub(),
-                                                       stub(:read => '')).returns(stub(:exitstatus => '0'))
+    stdout_r, stdout_w = IO.pipe
+    stdout_w << @results[script][:output]
+    stdout_w.close
+    
+    stdin_r, stdin_w = IO.pipe
+    
+    stderr_r, stderr_w = IO.pipe
+    stderr_w << @results[script][:error]
+    stderr_w.close
+    
+    return stdout_r, stdin_w, stderr_r
+  end
+  
+  def setup_external_scripts_to_all_be_successful
+    update_stdout, update_stdin, update_stderr = fresh_ios_for('update')
+    version_stdout, version_stdin, version_stderr = fresh_ios_for('version')
+    test_stdout, test_stdin, test_stderr = fresh_ios_for('test')
+    
+    Open4.stubs(:popen4).with('.ci/update').yields(11111, update_stdin, update_stdout, update_stderr).returns(stub(:exitstatus => '0'))
+    
+    Open4.stubs(:popen4).with('.ci/version').yields(11111, version_stdin, version_stdout, version_stderr).returns(stub(:exitstatus => '0'))
+    
+    Open4.stubs(:popen4).with('.ci/test').yields(11111, test_stdin, test_stdout, test_stderr).returns(stub(:exitstatus => '0'))
+    
+    IO.stubs(:select).returns([[update_stdout], [update_stdin], [update_stderr]], [[version_stdout], [version_stdin], [version_stderr]], [[test_stdout], [test_stdin], [test_stderr]])
+    
+    r, conclusion_stdin = IO.pipe
+    conclusion_stderr, w = IO.pipe
+    w.close
+    
+    Open4.stubs(:popen4).with('.ci/conclusion').yields(11111, conclusion_stdin, nil, test_stderr).returns(stub(:exitstatus => '0'))
   end
 end

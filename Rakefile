@@ -52,7 +52,8 @@ Rake::GemPackageTask.new(spec) do |p|
 end
 
 desc "Install #{name} gem (#{version})"
-task :install => [ :test, :package ] do
+# task :install => [ :test, :package ] do
+task :install => [  :package ] do
   sh %{gem install pkg/#{name}-#{version}.gem --no-rdoc --no-ri}
 end
 

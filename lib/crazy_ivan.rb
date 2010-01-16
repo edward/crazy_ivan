@@ -122,6 +122,7 @@ module CrazyIvan
     report = ReportAssembler.new(Dir.pwd, output_directory)
     report.generate
     
+    # TODO this should really indicate how many projects were tested
     msg = "Generated test reports for #{report.runners.size} projects"
     Syslog.info(msg)
     puts msg
