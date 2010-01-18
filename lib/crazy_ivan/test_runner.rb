@@ -68,8 +68,9 @@ class TestRunner
           
           if script_output
             begin
-              output << stdout.readpartial(4096)
-              puts output
+              new_output = stdout.readpartial(4096)
+              output << new_output
+              print new_output
               
               if options[:stream_test_results?]
                 @results[:test][:output] = output
@@ -82,8 +83,9 @@ class TestRunner
           
           if script_error
             begin
-              error << stderr.readpartial(4096)
-              puts error
+              new_error = stderr.readpartial(4096)
+              error << new_error
+              print error
               
               if options[:stream_test_results?]
                 @results[:test][:error] = error
