@@ -32,6 +32,7 @@
         
         new Ajax.Request('projects.json', {
           asynchronous: false,
+          method: 'GET',
           onSuccess: function(transport) {
             project_names = transport.responseText.evalJSON().projects;
           }
@@ -64,6 +65,7 @@
         var recent_versions = [];
         new Ajax.Request(project + '/recent.json', {
           asynchronous: false,
+          method: 'GET',
           onSuccess: function(transport) {
             recent_versions = transport.responseText.evalJSON().recent_versions;
           }
@@ -77,6 +79,7 @@
         
         new Ajax.Request(url, {
           asynchronous: false,
+          method: 'GET',
           onSuccess: function(transport) {
             report = transport.responseText.evalJSON();
           }
@@ -89,6 +92,7 @@
         
         new Ajax.Request(project + '/currently_building.json', {
           asynchronous: false,
+          method: 'GET',
           onSuccess: function(transport) {
             build_in_progress = transport.responseText.evalJSON();
           }
