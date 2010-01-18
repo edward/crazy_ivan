@@ -208,7 +208,10 @@
         $("replace").update(html);
         
         $$('.project .tests').each(function(t) {
-          t.down('.test').addClassName('latest')
+          latest_date = t.down('.test');
+          if(latest_date) {
+            latest_date.addClassName('latest')
+          }
         });
         
         // Reformat the test timestamps to be less enormous and open up on clicking
@@ -217,6 +220,7 @@
           t.observe('click', function(e) {
             $$('.results').invoke('show');
             show_reports = true;
+            
             return false;
           });
         });
