@@ -11,121 +11,31 @@
     <script type="text/javascript" src="javascript/date.js"></script>
     <script type="text/javascript" src="javascript/json-template.js"></script>
     <script type="text/javascript">
-      var init = function() {
-        render('index.jsont', projects());
-        // $$('.results').invoke('hide')
-        new PeriodicalExecuter(render_projects, 1);
-      }
-      
-      var show_reports = false;
-      
-      var render_projects = function() {
-        render('index.jsont', projects());
-        if(!show_reports) {
-          $$('.results').invoke('hide');
-        }
-      }
-      
-      var projects = function() {
-        var projects = [];
-        var project_names = [];
-        
-        new Ajax.Request('projects.json', {
-          asynchronous: false,
-          method: 'GET',
-          onSuccess: function(transport) {
-            project_names = transport.responseText.evalJSON().projects;
-          }
-        });
-        
-        project_names.each(function(project_name) {
-          var reports = [];
-          
-          reports = recent_versions(project_name).map(function(version) {
-            return version_test_report(project_name, version);
-          })
-          
-          var project = {name: project_name, reports: reports.reverse()};
-          
-          var progress_report = build_in_progress(project_name);
-          if(progress_report.timestamp) {
-            minutes_started_ago = Math.floor(((new Date() - Date.parse(progress_report.timestamp.start)) / 1000) / 60);
-            progress_report['minutes_started_ago'] = minutes_started_ago;
-                        
-            project['build_in_progress'] = progress_report;
-          }
-          
-          projects.push(project);
-        })
-        
-        return {"projects": projects};
-      }
-      
-      var recent_versions = function(project) {
-        var recent_versions = [];
-        new Ajax.Request(project + '/recent.json', {
-          asynchronous: false,
-          method: 'GET',
-          onSuccess: function(transport) {
-            recent_versions = transport.responseText.evalJSON().recent_versions;
-          }
-        });
-        return recent_versions;
-      }
-      
-      var version_test_report = function(project, version) {
-        var report = {};
-        url = project + '/' + version + '.json';
-        
-        new Ajax.Request(url, {
-          asynchronous: false,
-          method: 'GET',
-          onSuccess: function(transport) {
-            report = transport.responseText.evalJSON();
-          }
-        });
-        return report;
-      }
-      
-      var build_in_progress = function(project) {
-        var build_in_progress = {};
-        
-        new Ajax.Request(project + '/currently_building.json', {
-          asynchronous: false,
-          method: 'GET',
-          onSuccess: function(transport) {
-            build_in_progress = transport.responseText.evalJSON();
-          }
-        });
-        return build_in_progress;
-      }
-      
-      var expand = function(element) {
-        element.siblings().invoke('show');
-        element.remove();
-      }
-      
-      var render = function(template_name, json) {
-        var template = jsontemplate.Template("                                                                                             \
-          <h1>Projects</h1>                                                                                                                \
-          <div class='projects'>                                                                                                           \
-            {.section projects}                                                                                                            \
-              {.repeated section @}                                                                                                        \
-                <div class='project'>                                                                                                      \
-                  <h2>{name}</h2>                                                                                                          \
-                  <div class='tests'>                                                                                                      \
-                    {.section reports}                                                                                                     \
-                      {.repeated section @}                                                                                                \
-                        <a class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
-                      {.end}                                                                                                               \
-                    {.end}                                                                                                                 \
-                    {.section build_in_progress}                                                                                             \
-                      <div>Build {.section version}{output} {.end} in progress &ndash; started {minutes_started_ago} minutes(s) ago</div>   \
-                    {.end}                                                                                                                   \
-                  </div>                                                                                                                   \
+      var template = jsontemplate.Template("                                                                                             \
+        <div class='projects'>                                                                                                           \
+          {.section projects}                                                                                                            \
+            {.repeated section @}                                                                                                        \
+              <div class='project'>                                                                                                      \
+                <h2>{name}</h2>                                                                                                          \
+                <div class='tests'>                                                                                                      \
+                  {.section reports}  \
+                    {.repeated section @}      \
+                      <a id='{.section version}{output}{.end}' class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
+                    {.end}                                                                                                               \
+                  {.end}                                                                                                                 \
                   {.section build_in_progress}                                                                                             \
-                    <div class='build-in-progress'>                                                                                        \
-                      <div class='result'>                                                                                                 \
+                    <div>Build {.section version}{output} {.end} in progress &ndash; started {minutes_started_ago} minutes(s) ago</div>   \
+                  {.end}                                                                                                                   \
+                </div>                                                                                                                   \
+                <div class='results'>                                                                                                    \
+                  {.section reports}                                                                                                     \
+                    {.repeated section @}                                                                                                \
+                      <div class='result' style='display:none' id='result-{.section version}{output}{.end}'>                             \
+                        <div>                                                                                                            \
+                          <span class='timestamp'>{timestamp.finish}</span>                                                              \
+                          <span class='version'>{version.output}</span>                                                                  \
+                        </div>                                                                                                           \
+                                                                                                                                         \
                         <div class='output'>                                                                                             \
                           {.section version}                                                                                             \
                             {.section exit_status}                                                                                       \
@@ -154,55 +64,70 @@
                           </div>                                                                                                         \
                         </div>                                                                                                           \
                       </div>                                                                                                             \
-                    </div>                                                                                                                 \
-                  {.end}                                                                                                                   \
-                  <div class='results'>                                                                                                    \
-                    {.section reports}                                                                                                     \
-                      {.repeated section @}                                                                                                \
-                        <div class='result'>                                                                                               \
-                          <div>                                                                                                            \
-                            <span class='timestamp'>{timestamp.finish}</span>                                                              \
-                            <span class='version'>{version.output}</span>                                                                  \
-                          </div>                                                                                                           \
-                                                                                                                                           \
-                          <div class='output'>                                                                                             \
-                            {.section version}                                                                                             \
-                              {.section exit_status}                                                                                       \
-                                <div class='version'>                                                                                      \
-                                  <pre class='error'>{error}</pre>                                                                         \
-                                </div>                                                                                                     \
-                              {.end}                                                                                                       \
-                            {.end}                                                                                                         \
-                                                                                                                                           \
-                            <div class='update'>                                                                                           \
-                              <pre>{update.output}</pre>                                                                                   \
-                              {.section update}                                                                                            \
-                                {.section exit_status}                                                                                     \
-                                  <pre class='error'>{update.error}</pre>                                                                  \
-                                {.end}                                                                                                     \
-                              {.end}                                                                                                       \
-                            </div>                                                                                                         \
-                                                                                                                                           \
-                            <div class='test'>                                                                                             \
-                              <pre>{test.output}</pre>                                                                                     \
-                              {.section test}                                                                                              \
-                                {.section exit_status}                                                                                     \
-                                  <pre class='error'>{test.error}</pre>                                                                    \
-                                {.end}                                                                                                     \
-                              {.end}                                                                                                       \
-                            </div>                                                                                                         \
-                          </div>                                                                                                           \
-                        </div>                                                                                                             \
-                      {.end}                                                                                                               \
-                    {.end}                                                                                                                 \
-                  </div>                                                                                                                   \
-                </div>                                                                                                                     \
-              {.end}                                                                                                                       \
-            {.or}                                                                                                                          \
-              <p>No projects found.</p>                                                                                                    \
-            {.end}                                                                                                                         \
-          </div>                                                                                                                           \
-        ");
+                    {.end}                                                                                                               \
+                  {.end}                                                                                                                 \
+                </div>                                                                                                                   \
+              </div>                                                                                                                     \
+            {.end}                                                                                                                       \
+          {.or}                                                                                                                          \
+            <p>No projects found.</p>                                                                                                    \
+          {.end}                                                                                                                         \
+        </div>                                                                                                                           \
+      ");
+        
+      var json = {projects: []};
+
+      var init = function() {
+        new Ajax.Request('projects.json', {
+          method: 'get',
+          onSuccess: function(transport) {
+            try {
+              transport.responseText.evalJSON().projects.each(addProjectToJson);
+            } catch (e) {  console.error(e)  }
+          }
+        });
+        
+        //new PeriodicalExecuter(render_projects, 4);
+      }
+      
+      function addProjectToJson(project_name) {
+        var project = {name: project_name, reports: []};
+
+        new Ajax.Request(project_name + '/recent.json', {
+          method: 'get',
+          onSuccess: function(transport) {
+            try {
+              var results = transport.responseText.evalJSON();
+              
+              results.recent_versions.each(function(version) {
+                
+                 var url = project_name + '/' + version + '.json';
+                 
+                 var onBuildUpdate = function(transport) {
+                   project.reports.push(transport.responseText.evalJSON());
+                   trigger_render();
+                 }                 
+
+                 new Ajax.Request(url, {method: 'get', onSuccess: onBuildUpdate});                
+              })
+                                          
+              trigger_render();              
+            } catch(e) { console.error(e); }
+          }
+        });
+             
+        json.projects.push(project);
+      }
+      
+      var timeout = null;
+      
+      function trigger_render() {       
+        if (timeout)  { clearTimeout(timeout) }
+        timeout = setTimeout(render, 50);
+      }
+      
+      var render = function() {
+        console.log(json);
         
         var html = template.expand(json);
         $("replace").update(html);
@@ -218,16 +143,22 @@
         $$('.project .tests .test').each(function(t) {
           t.update(Date.parse(t.innerHTML).toString("HH:mm"));
           t.observe('click', function(e) {
-            $$('.results').invoke('show');
-            show_reports = true;
-            
+            alert('ok, called')
+            $$('div.result').each(Element.hide);
+            $('result-'+e.target.id).toggle();
+            Event.stop(e);
             return false;
           });
         });
       }
+      
+      $(document).observe('dom:loaded', function() {
+        init();      
+      });
     </script>
   </head>
-  <body onload="init();">
+  <body>
+    <h1>Projects</h1>
     <div id="replace"></div>
     
     <div class="footer">

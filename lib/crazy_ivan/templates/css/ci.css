@@ -22,9 +22,9 @@ pre { margin: 0;}
 
 .result .timestamp { margin-right: 12px;}
 .result .version { margin: 6px 0 6px 12px }
-.result .output { padding: 5px; color: silver; background:black; margin: 12px 18px 8px 18px;}
+.result .output { padding: 5px; color: silver; background:black; margin: 12px 18px 8px 18px; overflow: auto }
 .result .output .update { margin: 6px 0 6px 12px }
-.result .output .test { margin: 6px 0 6px 12px }
+.result .output .test { margin: 6px 0 6px 12px}
 
 .footer { 
   margin: 24px 0 0 0;
