@@ -143,7 +143,6 @@
         $$('.project .tests .test').each(function(t) {
           t.update(Date.parse(t.innerHTML).toString("HH:mm"));
           t.observe('click', function(e) {
-            alert('ok, called')
             $$('div.result').each(Element.hide);
             $('result-'+e.target.id).toggle();
             Event.stop(e);
