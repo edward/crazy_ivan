@@ -113,11 +113,12 @@
                  new Ajax.Request(url, {method: 'get', onSuccess: onBuildUpdate});                
               })
               
-              project.reports = project.reports.sortBy(function(report) { 
-                date = Date.parse(report.timestamp.finish)
-                return date.to_string('u')
+              project.reports = project.reports.sort(function(report_a, report_b) { 
+                a = Date.parse(report_a.timestamp.finish);
+                b = Date.parse(report_b.timestamp.finish);
+                return Date.compare(a, b);
               })
-
+              
               trigger_render();              
             } catch(e) { console.error(e); }
           }
