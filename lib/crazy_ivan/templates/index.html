@@ -104,7 +104,10 @@
                  var url = project_name + '/' + version + '.json';
                  
                  var onBuildUpdate = function(transport) {
-                   project.reports.push(transport.responseText.evalJSON());
+                   var r = JSON.parse(transport.responseText);
+                   r.test.output = r.test.output.escapeHTML();
+                   project.reports.push(r)
+                   
                    trigger_render();
                  }                 
 
