@@ -106,7 +106,7 @@
                  var onBuildUpdate = function(transport) {
                    var r = JSON.parse(transport.responseText);
                    r.test.output = r.test.output.escapeHTML();
-                   project.reports.push(r)
+                   project.reports.unshift(r)
                    trigger_render();
                  }                 
 
