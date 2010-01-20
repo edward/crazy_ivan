@@ -112,6 +112,11 @@
 
                  new Ajax.Request(url, {method: 'get', onSuccess: onBuildUpdate});                
               })
+              
+              project.reports = project.reports.sortBy(function(report) { 
+                date = Date.parse(report.timestamp.finish)
+                return date.to_string('u')
+              })
 
               trigger_render();              
             } catch(e) { console.error(e); }
@@ -129,8 +134,6 @@
       }
 
       var render = function() {
-        console.log(json);
-
         var html = template.expand(json);
         $("replace").update(html);
 
