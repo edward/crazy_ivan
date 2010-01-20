@@ -138,8 +138,6 @@
 
       var render = function() {
         json.projects.each(function(project) {
-          // project.reports = [];
-          console.debug(sortReports(project.reports))
           project.reports = sortReports(project.reports);
         });
         
