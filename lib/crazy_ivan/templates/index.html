@@ -20,7 +20,7 @@
                 <div class='tests'>                                                                                                      \
                   {.section reports}  \
                     {.repeated section @}      \
-                      <a id='{.section version}{output}{.end}' class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
+                      <a id='{name}-{.section version}{output}{.end}' class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
                     {.end}                                                                                                               \
                   {.end}                                                                                                                 \
                   {.section build_in_progress}                                                                                             \
@@ -30,7 +30,7 @@
                 <div class='results'>                                                                                                    \
                   {.section reports}                                                                                                     \
                     {.repeated section @}                                                                                                \
-                      <div class='result' style='display:none' id='result-{.section version}{output}{.end}'>                             \
+                      <div class='result' style='display: none' id='result-{name}-{.section version}{output}{.end}'>                             \
                         <div>                                                                                                            \
                           <span class='timestamp'>{timestamp.finish}</span>                                                              \
                           <span class='version'>{version.output}</span>                                                                  \
@@ -74,7 +74,7 @@
           {.end}                                                                                                                         \
         </div>                                                                                                                           \
       ");
-        
+
       var json = {projects: []};
 
       var init = function() {
@@ -86,10 +86,10 @@
             } catch (e) {  console.error(e)  }
           }
         });
-        
+
         //new PeriodicalExecuter(render_projects, 4);
       }
-      
+
       function addProjectToJson(project_name) {
         var project = {name: project_name, reports: []};
 
@@ -98,50 +98,49 @@
           onSuccess: function(transport) {
             try {
               var results = transport.responseText.evalJSON();
-              
+
               results.recent_versions.each(function(version) {
-                
+
                  var url = project_name + '/' + version + '.json';
-                 
+
                  var onBuildUpdate = function(transport) {
                    var r = JSON.parse(transport.responseText);
                    r.test.output = r.test.output.escapeHTML();
                    project.reports.push(r)
-                   
                    trigger_render();
                  }                 
 
                  new Ajax.Request(url, {method: 'get', onSuccess: onBuildUpdate});                
               })
-                                          
+
               trigger_render();              
             } catch(e) { console.error(e); }
           }
         });
-             
+
         json.projects.push(project);
       }
-      
+
       var timeout = null;
-      
+
       function trigger_render() {       
         if (timeout)  { clearTimeout(timeout) }
         timeout = setTimeout(render, 50);
       }
-      
+
       var render = function() {
         console.log(json);
-        
+
         var html = template.expand(json);
         $("replace").update(html);
-        
+
         $$('.project .tests').each(function(t) {
           latest_date = t.down('.test');
           if(latest_date) {
             latest_date.addClassName('latest')
           }
         });
-        
+
         // Reformat the test timestamps to be less enormous and open up on clicking
         $$('.project .tests .test').each(function(t) {
           t.update(Date.parse(t.innerHTML).toString("HH:mm"));
@@ -153,7 +152,7 @@
           });
         });
       }
-      
+
       $(document).observe('dom:loaded', function() {
         init();      
       });
@@ -162,7 +161,7 @@
   <body>
     <h1>Projects</h1>
     <div id="replace"></div>
-    
+
     <div class="footer">
       <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
     </div>
