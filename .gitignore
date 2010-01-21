@@ -5,3 +5,6 @@ rdoc
 pkg
 *.gem
 www
+
+# ignore .json files in template - had them for testing
+lib/crazy_ivan/templates/*.json
