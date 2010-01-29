@@ -140,10 +140,8 @@ class ReportAssembler
   end
   
   def update_index
-    index_template = HtmlAssetCrush.crush(File.join(TEMPLATES_PATH, "index.html"))
-    
     File.open('index.html', 'w+') do |f|
-      f.print index_template
+      f.print(File.read(File.expand_path("index.html", TEMPLATES_PATH)))
     end
   end
 end
