@@ -87,12 +87,15 @@ end
 
 report = JSON.parse(STDIN.read)
 
-exit unless report['version']['exit_status']
-
 campfire_url = URI.parse(ARGV[0])
 Campfire.base_uri campfire_url.scheme + '://' + campfire_url.host
 Campfire.basic_auth ARGV[1], 'x'
 
 campfire_room_id = campfire_url.path[/\d+/]
 campfire_room = Campfire.room(campfire_room_id)
-campfire_room.message "#{report['project_name']} #{report['version']['output']} broke. Please take a look at #{ARGV[2]}"
+
+if report['test']['exit_status'].nil?
+  campfire_room.message "#{report['project_name']} #{report['version']['output']} built happily: #{ARGV[2]}"
+else
+  campfire_room.message "#{report['project_name']} #{report['version']['output']} broke. Please take a look at #{ARGV[2]}"
+end
