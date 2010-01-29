@@ -1,179 +1,163 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
-  "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-  <head>
-    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-    <title>Crazy Ivan: CI straight up.</title>
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+  <title>Crazy Ivan: CI straight up.</title>
+  
+  <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script type="text/javascript">
+    // Simple JavaScript Templating
+    // John Resig - http://ejohn.org/ - MIT Licensed
+    (function(){
+      var cache = {};
+ 
+      this.tmpl = function tmpl(str, data){
+        // Figure out if we're getting a template, or if we need to
+        // load the template - and be sure to cache the result.
+        var fn = !/\W/.test(str) ?
+          cache[str] = cache[str] ||
+            tmpl(document.getElementById(str).innerHTML) :
+     
+          // Generate a reusable function that will serve as a template
+          // generator (and which will be cached).
+          new Function("obj",
+            "var p=[],print=function(){p.push.apply(p,arguments);};" +
+       
+            // Introduce the data as local variables using with(){}
+            "with(obj){p.push('" +
+       
+            // Convert the template into pure JavaScript
+            str
+              .replace(/[\r\t\n]/g, " ")
+              .split("<%").join("\t")
+              .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+              .replace(/\t=(.*?)%>/g, "',$1,'")
+              .split("\t").join("');")
+              .split("%>").join("p.push('")
+              .split("\r").join("\\'")
+          + "');}return p.join('');");
+   
+        // Provide some basic currying to the user
+        return data ? fn( data ) : fn;
+      };
+    })();
+  </script>
+  <style type="text/css" media="screen">
+    * html { font-family: arial, sans-serif;}
     
-    <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
-    <script type="text/javascript" src="javascript/prototype.js"></script>
-    <script type="text/javascript" src="javascript/scriptaculous.js"></script>
-    <script type="text/javascript" src="javascript/date.js"></script>
-    <script type="text/javascript" src="javascript/json-template.js"></script>
-    <script type="text/javascript">
-      var template = jsontemplate.Template("                                                                                             \
-        <div class='projects'>                                                                                                           \
-          {.section projects}                                                                                                            \
-            {.repeated section @}                                                                                                        \
-              <div class='project'>                                                                                                      \
-                <h2>{name}</h2>                                                                                                          \
-                <div class='tests'>                                                                                                      \
-                  {.section reports}  \
-                    {.repeated section @}      \
-                      <a id='{name}-{.section version}{output}{.end}' class='test {.section test} {.section exit_status} error {.end} {.end} {.section update} {.section exit_status} error {.end} {.end}' href='#'>{timestamp.finish}</a>   \
-                    {.end}                                                                                                               \
-                  {.end}                                                                                                                 \
-                  {.section build_in_progress}                                                                                             \
-                    <div>Build {.section version}{output} {.end} in progress &ndash; started {minutes_started_ago} minutes(s) ago</div>   \
-                  {.end}                                                                                                                   \
-                </div>                                                                                                                   \
-                <div class='results'>                                                                                                    \
-                  {.section reports}                                                                                                     \
-                    {.repeated section @}                                                                                                \
-                      <div class='result' style='display: none' id='result-{name}-{.section version}{output}{.end}'>                             \
-                        <div>                                                                                                            \
-                          <span class='timestamp'>{timestamp.finish}</span>                                                              \
-                          <span class='version'>{version.output}</span>                                                                  \
-                        </div>                                                                                                           \
-                                                                                                                                         \
-                        <div class='output'>                                                                                             \
-                          {.section version}                                                                                             \
-                            {.section exit_status}                                                                                       \
-                              <div class='version'>                                                                                      \
-                                <pre class='error'>{error}</pre>                                                                         \
-                              </div>                                                                                                     \
-                            {.end}                                                                                                       \
-                          {.end}                                                                                                         \
-                                                                                                                                         \
-                          <div class='update'>                                                                                           \
-                            <pre>{update.output}</pre>                                                                                   \
-                            {.section update}                                                                                            \
-                              {.section exit_status}                                                                                     \
-                                <pre class='error'>{update.error}</pre>                                                                  \
-                              {.end}                                                                                                     \
-                            {.end}                                                                                                       \
-                          </div>                                                                                                         \
-                                                                                                                                         \
-                          <div class='test'>                                                                                             \
-                            <pre>{test.output}</pre>                                                                                     \
-                            {.section test}                                                                                              \
-                              {.section exit_status}                                                                                     \
-                                <pre class='error'>{test.error}</pre>                                                                    \
-                              {.end}                                                                                                     \
-                            {.end}                                                                                                       \
-                          </div>                                                                                                         \
-                        </div>                                                                                                           \
-                      </div>                                                                                                             \
-                    {.end}                                                                                                               \
-                  {.end}                                                                                                                 \
-                </div>                                                                                                                   \
-              </div>                                                                                                                     \
-            {.end}                                                                                                                       \
-          {.or}                                                                                                                          \
-            <p>No projects found.</p>                                                                                                    \
-          {.end}                                                                                                                         \
-        </div>                                                                                                                           \
-      ");
+    .project { margin: 10px; border: 1px solid #ddd; padding: 10px; background: #f0f0f0;}
+    
+    .build_report { border: 1px solid #333; padding: 10px; background: #222; color: #fff;}
 
-      var json = {projects: []};
+    ul.builds { list-style:none; margin: 10px 0; padding: 0; }
+    ul.builds li { list-style:none; display:inline; margin: 0; padding: 5px 10px; }
+    ul.builds li { text-decoration: underline; cursor: pointer; color: blue; }
+    ul.builds li.failed { color: red; }
+    ul.builds li.active { background: #ffa; font-weight: bold; }        
+  </style>
+</head>
+<body>
+  <h1>Projects</h1>
+  <div id="projects">
+<!-- project results get inserted here -->
+  </div>
 
-      var init = function() {
-        new Ajax.Request('projects.json', {
-          method: 'get',
-          onSuccess: function(transport) {
-            try {
-              transport.responseText.evalJSON().projects.each(addProjectToJson);
-            } catch (e) {  console.error(e)  }
-          }
-        });
 
-        //new PeriodicalExecuter(render_projects, 4);
-      }
+  <div class="footer">
+    <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
+  </div>
+  
+<!-- templates -->  
 
-      function addProjectToJson(project_name) {
-        var project = {name: project_name, reports: []};
+<!-- project holder template -->
+<script type="text/html" id="project_template">
+  <div id="<%= id %>" class="project">
+    <h2><%= name %></h2>
+    <ul class="builds"></ul>
+    <div class="build-reports"></div>
+  <div>
+</script>
 
-        new Ajax.Request(project_name + '/recent.json', {
-          method: 'get',
-          onSuccess: function(transport) {
-            try {
-              var results = transport.responseText.evalJSON();
+<!-- link_to_build template -->
+<script type="text/html" id="link_template">
+  <li id="<%= id %>">Link</li>
+</script>
 
-              results.recent_versions.each(function(version) {
-                 var url = project_name + '/' + version + '.json';
-
-                 var onBuildUpdate = function(transport) {
-                   var r = JSON.parse(transport.responseText);
-                   r.test.output = r.test.output.escapeHTML();
-                   project.reports.push(r);
-                   trigger_render();
-                 }
-
-                 new Ajax.Request(url, {method: 'get', onSuccess: onBuildUpdate});                
-              })
-              trigger_render();
-                            
-            } catch(e) { console.error(e); }
-          }
-        });
-        
-        json.projects.push(project);
-      }
-
-      function sortReports(reports) {
-        return reports.sort(function(report_a, report_b) { 
-          a = Date.parse(report_a.timestamp.finish);
-          b = Date.parse(report_b.timestamp.finish);
-          
-          return Date.compare(b, a);
-        });
-      }
-
-      var timeout = null;
-
-      function trigger_render() {       
-        if (timeout)  { clearTimeout(timeout) }
-        timeout = setTimeout(render, 50);
-      }
-
-      var render = function() {
-        json.projects.each(function(project) {
-          project.reports = sortReports(project.reports);
-        });
-        
-        var html = template.expand(json);
-        $("replace").update(html);
-
-        $$('.project .tests').each(function(t) {
-          latest_date = t.down('.test');
-          if(latest_date) {
-            latest_date.addClassName('latest')
-          }
-        });
-
-        // Reformat the test timestamps to be less enormous and open up on clicking
-        $$('.project .tests .test').each(function(t) {
-          t.update(Date.parse(t.innerHTML).toString("HH:mm"));
-          t.observe('click', function(e) {
-            $$('div.result').each(Element.hide);
-            $('result-'+e.target.id).toggle();
-            Event.stop(e);
-            return false;
-          });
-        });
-      }
-
-      $(document).observe('dom:loaded', function() {
-        init();      
-      });
-    </script>
-  </head>
-  <body>
-    <h1>Projects</h1>
-    <div id="replace"></div>
-
-    <div class="footer">
-      <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
+<!-- build holder -->
+<script type="text/html" id="build_template">
+  <div id="build_<%= version.output %>" class="build_report"  style="display:none">
+    <p class="timestamp"><%= timestamp.finish %></p>
+    <p class="version"><%= version.output %></p>
+    <div class="output">
+      <pre><%= test.output.replace(/\</g, "&lt;").replace(/\>/g, "&gt;") %></pre>
+      <pre><%= test.error %></pre>
     </div>
-  </body>
+  </div>
+</script>
+
+
+
+<script type="text/javascript" charset="utf-8">
+
+  // load and build each project div
+  var loadProject = function(project_name) {
+    var json_file = project_name+"/recent.json";
+    var domid     = project_name.replace(/\./g, "");      // remove . from id name
+        
+    // create project holder DIV
+    $('#projects').append( tmpl("project_template", {name: project_name, id: domid}));
+
+    // gets recent.json
+    jQuery.getJSON(json_file, function(data){
+      jQuery.each(data.recent_versions, function(i, build_id){
+        $("#"+domid+" ul.builds").append( tmpl("link_template", { id : build_id }) ); // insert a li and get the build data for it
+        loadBuild(project_name, build_id);  // create each build report
+      });
+    });
+  };
+
+  // creates each build report
+  var loadBuild = function(project_name, build_id) {
+    var json_file = project_name+"/"+build_id+".json";
+    var domid     = project_name.replace(/\./g, "");      // remove . from id name
+    
+    jQuery.getJSON(json_file, function(data){
+    
+      $("#"+domid + " .build-reports").append( tmpl("build_template", data) );      
+    
+      // get timestamp info and update build link
+      var timestamp = new Date(Date.parse(data.timestamp.finish));
+      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      var label = months[timestamp.getMonth()]+" "+timestamp.getDay()+" "+timestamp.getHours() + ":"+ timestamp.getMinutes();
+      $("#"+build_id).html(label); // 12:45
+      
+      // add failed/success class to link
+      if (data.test.exit_status) {
+        $("#"+build_id).addClass('failed');        
+      }
+    });
+  };
+
+
+  jQuery(document).ready(function($){
+    // load list of projects
+    $.getJSON("projects.json", function(data) {
+      jQuery.each(data.projects, function(){
+        loadProject(this);
+      });
+    });
+    
+    // listen to clicking of build links
+    $('ul.builds li').live('click', function(e){
+      var build = "#build_"+e.target.id; 
+      $('.build_report:visible').hide(); // hide all visible reports
+      $(build).show();                   // show selected one
+      
+      $('ul.builds li.active').removeClass('active');
+      $(e.target).addClass('active');      
+    });
+  });
+</script>
+</body>
 </html>
