@@ -67,8 +67,9 @@ class TestRunner
           script_error = ready_io_streams[2].pop
           
           if script_output && !script_output.eof?
-            output << script_output.readpartial(4096)
-            puts output
+            o = script_output.readpartial(4096)
+            print o
+            output << o
             
             if options[:stream_test_results?]
               @results[:test][:output] = output
@@ -77,8 +78,9 @@ class TestRunner
           end
           
           if script_error && !script_error.eof?
-            error << script_error.readpartial(4096)
-            puts error
+            e = script_error.readpartial(4096)
+            print e
+            error << e
             
             if options[:stream_test_results?]
               @results[:test][:error] = error
@@ -89,8 +91,9 @@ class TestRunner
           # FIXME - this feels like I'm using IO.select wrong
           if script_output.eof? && script_error.nil?
             # there's no more output to SDOUT, and there aren't any errors
-            error << stderr.read
-            puts error
+            e = stderr.read
+            error << e
+            print e
             
             if options[:stream_test_results?]
               @results[:test][:error] = error
