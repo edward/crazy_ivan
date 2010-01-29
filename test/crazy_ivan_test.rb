@@ -35,6 +35,10 @@ class CrazyIvanTest < Test::Unit::TestCase
       
       assert_equal "completely-working", test_results["project_name"]
       
+      # FIXME add another project that fails so we can see its errors
+      
+      # FIXME add projects that each fail (exit status non-zero) at different steps (in update, version, test)
+      
       # FIXME use a time range here
       assert test_results["timestamp"]["start"]
       assert test_results["timestamp"]["finish"]
