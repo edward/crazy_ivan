@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+# This script runs your testing suite. For a typical Ruby project running
+# test-unit this is probably all you need.
+
+# rake
+
+STDOUT.puts "Some valid test results. No fails."
+STDERR.puts ""
+
+exit(0)

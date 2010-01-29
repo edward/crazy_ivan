@@ -52,11 +52,10 @@ Crazy Ivan (CI) is simplest possible continuous integration tool.
        to execute at the /:
        
           /shopify
-            /.ci
-              update
-              version
-              test
-              conclusion
+            /.ci/update
+                 version
+                 test
+                 conclusion
 
   * crazy_ivan first executes `update` and captures the output:
   

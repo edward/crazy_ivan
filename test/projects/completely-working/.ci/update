@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+# This script updates your code
+#
+# If you can't use a version control system, this script could just do some
+# some basic copying commands.
+
+# git pull
+
+STDOUT.puts "a-valid-update"
+STDERR.puts ""
+
+exit(0)

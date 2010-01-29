@@ -8,9 +8,11 @@ class ProcessManagerTest < Test::Unit::TestCase
   end
   
   def test_exclusive_lock
-    ProcessManager.lock_exclusively!
-    
-    Process.expects(:kill)
-    ProcessManager.lock_exclusively!
+    do_silently do
+      ProcessManager.lock_exclusively!
+
+      Process.expects(:kill)
+      ProcessManager.lock_exclusively!
+    end
   end
 end

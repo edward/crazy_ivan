@@ -86,9 +86,10 @@ class ReportAssembler
   end
   
   def update_project(runner)
-    FileUtils.mkdir_p(runner.project_name)
-    Dir.chdir(File.expand_path(runner.project_name, @output_directory)) do
-      
+    project_path = File.expand_path(runner.project_name, @output_directory)
+    FileUtils.mkdir_p(project_path)
+    
+    Dir.chdir(project_path) do
       filename = ''
       
       if runner.still_building?

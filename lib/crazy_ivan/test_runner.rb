@@ -60,7 +60,7 @@ class TestRunner
         stdin.close  # Close to prevent hanging if the script wants input
         
         until stdout.eof? && stderr.eof? do
-          ready_io_streams = IO.select( [stdout], nil, [stderr], 3600 )
+          ready_io_streams = select( [stdout], nil, [stderr], 3600 )
           Syslog.debug "Got back #{ready_io_streams.inspect}"
           
           script_output = ready_io_streams[0].pop
@@ -78,6 +78,18 @@ class TestRunner
           
           if script_error && !script_error.eof?
             error << script_error.readpartial(4096)
+            puts error
+            
+            if options[:stream_test_results?]
+              @results[:test][:error] = error
+              @report_assembler.update_project(self)
+            end
+          end
+          
+          # FIXME - this feels like I'm using IO.select wrong
+          if script_output.eof? && script_error.nil?
+            # there's no more output to SDOUT, and there aren't any errors
+            error << stderr.read
             puts error
             
             if options[:stream_test_results?]

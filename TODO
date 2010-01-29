@@ -24,3 +24,11 @@
 * Write a man page with Ron: http://github.com/rtomayko/ron
 
 * Refactor and document Syslog to have method names that actually match the syslog levels (like #error instead of #err )
+
+* Output should look like
+
+ exist  
+create  README
+create  .gitignore
+create  Rakefile
+create  config.ru
