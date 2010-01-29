@@ -61,7 +61,6 @@ class TestRunner
         
         until stdout.eof? && stderr.eof? do
           ready_io_streams = select( [stdout], nil, [stderr], 3600 )
-          Syslog.debug "Got back #{ready_io_streams.inspect}"
           
           script_output = ready_io_streams[0].pop
           script_error = ready_io_streams[2].pop
