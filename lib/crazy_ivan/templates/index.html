@@ -63,13 +63,14 @@
       .project h2 { margin: 12px 0 0 0;}
 
       .tests { margin: 0 0 0 18px;}
-      .tests .test { font-size: 80%; margin-right: 8px;}
+      .tests .test { font-size: 80%; margin-right: 8px}
+      .tests a.test:hover { text-decoration: underline;}
       .tests .test:first-child { font-size: 100%;}
       .tests .test.active { font-weight: bold;}
 
       .result .timestamp { margin-right: 12px;}
       .result .version { margin: 6px 0 6px 12px }
-      .result .output { padding: 5px; color: silver; background:black; margin: 12px 18px 8px 18px; overflow: auto }
+      .result .output { padding: 5px; color: silver; background: black; margin: 12px 18px 8px 18px; overflow: auto }
       .result .output .update { margin: 6px 0 6px 12px }
       .result .output .test { margin: 6px 0 6px 12px}
 
@@ -115,9 +116,9 @@
         </div>
         
         <div class="output">
-          <div class="version"><pre class="error"><%= version.error %></pre></div>
+          <div class="version" style="display: none"><pre class="error"><%= version.error %></pre></div>
           
-          <div class="update"
+          <div class="update" style="display: none">
             <pre><%= update.output %></pre>
             <pre class="error"><%= update.error %></pre>
           </div>
@@ -162,7 +163,7 @@
         $("#" + domId + " .results").append(tmpl("resultTemplate", data));
         $('#' + domId + ' .tests').prepend(tmpl("resultLinkTemplate", data));
         
-        // add failed/success class to link - inlining in the template screws up
+        // add failed/success indication to link - inlining in the template screws up
         if (data.test.exit_status) {
           $("#" + domId + '-' + version).addClass('error');
         }
