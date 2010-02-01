@@ -140,8 +140,8 @@ class ReportAssembler
   end
   
   def update_index
-    File.open('index.html', 'w+') do |f|
-      f.print(File.read(File.expand_path("index.html", TEMPLATES_PATH)))
-    end
+    FileUtils.cp(File.expand_path("index.html", TEMPLATES_PATH), 'index.html')
+    FileUtils.mkdir_p('javascript')
+    FileUtils.cp(File.expand_path("date.js", File.join(TEMPLATES_PATH, 'javascript')), 'javascript/date.js')
   end
 end

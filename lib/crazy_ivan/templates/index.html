@@ -1,163 +1,195 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-<head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <title>Crazy Ivan: CI straight up.</title>
-  
-  <link rel="stylesheet" href="css/ci.css" type="text/css" charset="utf-8">
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-  <script type="text/javascript">
-    // Simple JavaScript Templating
-    // John Resig - http://ejohn.org/ - MIT Licensed
-    (function(){
-      var cache = {};
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Crazy Ivan: CI straight up.</title>
+    
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf-8" src="javascript/date.js"></script>
+    <script type="text/javascript">
+      // Simple JavaScript Templating
+      // John Resig - http://ejohn.org/ - MIT Licensed
+      (function(){
+        var cache = {};
  
-      this.tmpl = function tmpl(str, data){
-        // Figure out if we're getting a template, or if we need to
-        // load the template - and be sure to cache the result.
-        var fn = !/\W/.test(str) ?
-          cache[str] = cache[str] ||
-            tmpl(document.getElementById(str).innerHTML) :
+        this.tmpl = function tmpl(str, data){
+          // Figure out if we're getting a template, or if we need to
+          // load the template - and be sure to cache the result.
+          var fn = !/\W/.test(str) ?
+            cache[str] = cache[str] ||
+              tmpl(document.getElementById(str).innerHTML) :
      
-          // Generate a reusable function that will serve as a template
-          // generator (and which will be cached).
-          new Function("obj",
-            "var p=[],print=function(){p.push.apply(p,arguments);};" +
+            // Generate a reusable function that will serve as a template
+            // generator (and which will be cached).
+            new Function("obj",
+              "var p=[],print=function(){p.push.apply(p,arguments);};" +
        
-            // Introduce the data as local variables using with(){}
-            "with(obj){p.push('" +
+              // Introduce the data as local variables using with(){}
+              "with(obj){p.push('" +
        
-            // Convert the template into pure JavaScript
-            str
-              .replace(/[\r\t\n]/g, " ")
-              .split("<%").join("\t")
-              .replace(/((^|%>)[^\t]*)'/g, "$1\r")
-              .replace(/\t=(.*?)%>/g, "',$1,'")
-              .split("\t").join("');")
-              .split("%>").join("p.push('")
-              .split("\r").join("\\'")
-          + "');}return p.join('');");
+              // Convert the template into pure JavaScript
+              str
+                .replace(/[\r\t\n]/g, " ")
+                .split("<%").join("\t")
+                .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                .replace(/\t=(.*?)%>/g, "',$1,'")
+                .split("\t").join("');")
+                .split("%>").join("p.push('")
+                .split("\r").join("\\'")
+            + "');}return p.join('');");
    
-        // Provide some basic currying to the user
-        return data ? fn( data ) : fn;
-      };
-    })();
-  </script>
-  <style type="text/css" media="screen">
-    * html { font-family: arial, sans-serif;}
-    
-    .project { margin: 10px; border: 1px solid #ddd; padding: 10px; background: #f0f0f0;}
-    
-    .build_report { border: 1px solid #333; padding: 10px; background: #222; color: #fff;}
-
-    ul.builds { list-style:none; margin: 10px 0; padding: 0; }
-    ul.builds li { list-style:none; display:inline; margin: 0; padding: 5px 10px; }
-    ul.builds li { text-decoration: underline; cursor: pointer; color: blue; }
-    ul.builds li.failed { color: red; }
-    ul.builds li.active { background: #ffa; font-weight: bold; }        
-  </style>
-</head>
-<body>
-  <h1>Projects</h1>
-  <div id="projects">
-<!-- project results get inserted here -->
-  </div>
-
-
-  <div class="footer">
-    <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
-  </div>
-  
-<!-- templates -->  
-
-<!-- project holder template -->
-<script type="text/html" id="project_template">
-  <div id="<%= id %>" class="project">
-    <h2><%= name %></h2>
-    <ul class="builds"></ul>
-    <div class="build-reports"></div>
-  <div>
-</script>
-
-<!-- link_to_build template -->
-<script type="text/html" id="link_template">
-  <li id="<%= id %>">Link</li>
-</script>
-
-<!-- build holder -->
-<script type="text/html" id="build_template">
-  <div id="build_<%= version.output %>" class="build_report"  style="display:none">
-    <p class="timestamp"><%= timestamp.finish %></p>
-    <p class="version"><%= version.output %></p>
-    <div class="output">
-      <pre><%= test.output.replace(/\</g, "&lt;").replace(/\>/g, "&gt;") %></pre>
-      <pre><%= test.error %></pre>
-    </div>
-  </div>
-</script>
-
-
-
-<script type="text/javascript" charset="utf-8">
-
-  // load and build each project div
-  var loadProject = function(project_name) {
-    var json_file = project_name+"/recent.json";
-    var domid     = project_name.replace(/\./g, "");      // remove . from id name
-        
-    // create project holder DIV
-    $('#projects').append( tmpl("project_template", {name: project_name, id: domid}));
-
-    // gets recent.json
-    jQuery.getJSON(json_file, function(data){
-      jQuery.each(data.recent_versions, function(i, build_id){
-        $("#"+domid+" ul.builds").append( tmpl("link_template", { id : build_id }) ); // insert a li and get the build data for it
-        loadBuild(project_name, build_id);  // create each build report
-      });
-    });
-  };
-
-  // creates each build report
-  var loadBuild = function(project_name, build_id) {
-    var json_file = project_name+"/"+build_id+".json";
-    var domid     = project_name.replace(/\./g, "");      // remove . from id name
-    
-    jQuery.getJSON(json_file, function(data){
-    
-      $("#"+domid + " .build-reports").append( tmpl("build_template", data) );      
-    
-      // get timestamp info and update build link
-      var timestamp = new Date(Date.parse(data.timestamp.finish));
-      var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      var label = months[timestamp.getMonth()]+" "+timestamp.getDay()+" "+timestamp.getHours() + ":"+ timestamp.getMinutes();
-      $("#"+build_id).html(label); // 12:45
-      
-      // add failed/success class to link
-      if (data.test.exit_status) {
-        $("#"+build_id).addClass('failed');        
+          // Provide some basic currying to the user
+          return data ? fn( data ) : fn;
+        };
+      })();
+    </script>
+    <style type="text/css" media="screen">
+      body {
+        margin: 2.5em 3em;
+        padding: 0;
+        background: #fff;
+        color: #333;
+        font: 100%/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
       }
-    });
-  };
 
+      h1 { margin: 0;}
 
-  jQuery(document).ready(function($){
-    // load list of projects
-    $.getJSON("projects.json", function(data) {
-      jQuery.each(data.projects, function(){
-        loadProject(this);
+      pre { margin: 0;}
+
+      .error {
+        color: red;
+      }
+
+      .project h2 { margin: 12px 0 0 0;}
+
+      .tests { margin: 0 0 0 18px;}
+      .tests .test { font-size: 80%; margin-right: 8px;}
+      .tests .test:first-child { font-size: 100%;}
+      .tests .test.active { font-weight: bold;}
+
+      .result .timestamp { margin-right: 12px;}
+      .result .version { margin: 6px 0 6px 12px }
+      .result .output { padding: 5px; color: silver; background:black; margin: 12px 18px 8px 18px; overflow: auto }
+      .result .output .update { margin: 6px 0 6px 12px }
+      .result .output .test { margin: 6px 0 6px 12px}
+
+      .footer { 
+        margin: 24px 0 0 0;
+        font-size: 60%;
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Projects</h1>
+    <div id="projects"></div>
+    
+    <div class="footer">
+      <a href="http://github.com/edward/crazy_ivan">Crazy Ivan on Github</a>
+    </div>
+  
+    <!-- templates -->  
+    
+    <!-- project template -->
+    <script type="text/html" id="projectTemplate">
+      <div id="<%= projectId %>" class="project">
+        <h2><%= projectName %></h2>
+        
+        <div class="tests"></div>
+        <div class="results"></div>
+      <div>
+    </script>
+    
+    <!-- test link template -->
+    <script type="text/html" id="resultLinkTemplate">
+      <a id="<%= projectDomId %>-<%= version.output %>" class="test"><%= shortTimeStamp %></a>
+    </script>
+    
+    <!-- build result holder -->
+    <script type="text/html" id="resultTemplate">
+      <div class="result <%= projectDomId %>-<%= version.output %>" style="display: none">
+        <div>
+          <span class="timestamp"><%= timestamp.finish %></span>
+          <span class="version"><%= version.output %></span>
+        </div>
+        
+        <div class="output">
+          <div class="version"><pre class="error"><%= version.error %></pre></div>
+          
+          <div class="update"
+            <pre><%= update.output %></pre>
+            <pre class="error"><%= update.error %></pre>
+          </div>
+          
+          <div class="test">
+            <pre><%= test.output.replace(/\</g, "&lt;").replace(/\>/g, "&gt;") %></pre>
+            <pre class="error"><%= test.error %></pre>
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script type="text/javascript" charset="utf-8">
+      // load and build each project div
+      var loadProject = function(name) {
+        var recentVersionsJsonPath = name + "/recent.json";
+        var domId = name.replace(/\./g, "");      // remove . from id name
+        
+        // create project holder div
+        $('#projects').append( tmpl("projectTemplate", {projectName: name, projectId: domId}));
+
+        // gets recent.json
+        jQuery.getJSON(recentVersionsJsonPath, function(data) {
+          jQuery.each(data.recent_versions, function(i, version) {
+            loadResult(name, version);  // create each build report
+          });
+        });
+      };
+
+    // creates each build result
+    var loadResult = function(name, version) {
+      var resultJsonPath = name + "/" + version + ".json";
+      var domId = name.replace(/\./g, "");      // remove . from id name
+    
+      jQuery.getJSON(resultJsonPath, function(data) {
+        // Not sure why providing a 3-letter day trips up Date.js sometimes
+        data["shortTimeStamp"] = Date.parse(data.timestamp.finish.substring(4)).toString("HH:mm");
+        data["projectDomId"] = domId;
+        
+        // FIXME clean each output with test.output.replace(/\</g, "&lt;").replace(/\>/g, "&gt;")
+        
+        $("#" + domId + " .results").append(tmpl("resultTemplate", data));
+        $('#' + domId + ' .tests').prepend(tmpl("resultLinkTemplate", data));
+        
+        // add failed/success class to link - inlining in the template screws up
+        if (data.test.exit_status) {
+          $("#" + domId + '-' + version).addClass('error');
+        }
+      });
+    };
+
+    jQuery(document).ready(function($){
+      // load list of projects
+      $.getJSON("projects.json", function(data) {
+        jQuery.each(data.projects, function(){
+          loadProject(this);
+        });
+      });
+      
+      // listen to clicking of test result links
+      $('#projects .project .tests a.test').live('click', function(e) {
+        $('.result:visible').hide();
+        
+        if($(e.target).hasClass('active')) {
+          $('.test').removeClass('active');
+        } else {
+          $('.test').removeClass('active');
+          $('.result.' + e.target.id).show(); 
+          $(e.target).addClass('active');
+        }
       });
     });
-    
-    // listen to clicking of build links
-    $('ul.builds li').live('click', function(e){
-      var build = "#build_"+e.target.id; 
-      $('.build_report:visible').hide(); // hide all visible reports
-      $(build).show();                   // show selected one
-      
-      $('ul.builds li.active').removeClass('active');
-      $(e.target).addClass('active');      
-    });
-  });
-</script>
-</body>
+  </script>
+  </body>
 </html>
