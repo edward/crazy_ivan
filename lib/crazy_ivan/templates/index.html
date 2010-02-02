@@ -181,10 +181,12 @@
       }
       
       var render = function() {
+        $('#projects').empty();
+        
         jQuery.each(json.projects, function(i, project) {
           var name = project.name;
           var domId = name.replace(/\./g, "");      // remove . from id name
-
+          
           // create project holder div
           $('#projects').append(tmpl("projectTemplate", {projectName: name, projectId: domId}));
           
@@ -208,20 +210,20 @@
             }
           });
         });
-        
-        // listen to clicking of test result links
-        $('#projects .project .tests a.test').live('click', function(e) {
-          $('.result:visible').hide();
-
-          if($(e.target).hasClass('active')) {
-            $('.test').removeClass('active');
-          } else {
-            $('.test').removeClass('active');
-            $('.result.' + e.target.id).show(); 
-            $(e.target).addClass('active');
-          }
-        });
       }
+      
+      // listen to clicking of test result links
+      $('#projects .project .tests a.test').live('click', function(e) {
+        $('.result:visible').hide();
+
+        if($(e.target).hasClass('active')) {
+          $('.test').removeClass('active');
+        } else {
+          $('.test').removeClass('active');
+          $('.result.' + e.target.id).show(); 
+          $(e.target).addClass('active');
+        }
+      });
   </script>
   </body>
 </html>
