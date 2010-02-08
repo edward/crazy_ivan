@@ -94,9 +94,12 @@ Campfire.basic_auth ARGV[1], 'x'
 campfire_room_id = campfire_url.path[/\d+/]
 campfire_room = Campfire.room(campfire_room_id)
 
-exit_status = report['test']['exit_status']     
+exit_status = report['test']['exit_status']
+version = report['version']['output'][0...5]
+version << '...' if report['version']['output'].size > 5
+
 if exit_status == "0" || exit_status.nil?
-  campfire_room.message "PASS: #{report['project_name']} #{report['version']['output']} built happily: #{ARGV[2]}"
+  campfire_room.message "PASS: #{report['project_name']} #{version} built happily: #{ARGV[2]}"
 else
-  campfire_room.message "FAIL: #{report['project_name']} #{report['version']['output']} broke. Please take a look at #{ARGV[2]}"
+  campfire_room.message "FAIL: #{report['project_name']} #{version} broke. Please take a look at #{ARGV[2]}"
 end
