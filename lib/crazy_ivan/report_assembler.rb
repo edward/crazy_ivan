@@ -65,16 +65,6 @@ class ReportAssembler
     return s
   end
   
-  def nullify_successful_exit_status_for_json_templates(results)
-    filtered_results = YAML.load(results.to_yaml)
-    
-    filtered_results[:version][:exit_status] = nil if filtered_results[:version][:exit_status] == '0'
-    filtered_results[:update][:exit_status] = nil if filtered_results[:update][:exit_status] == '0'
-    filtered_results[:test][:exit_status] = nil if filtered_results[:test][:exit_status] == '0'
-    
-    return filtered_results
-  end
-  
   def flush_build_progress(runner)
     project_results_path = File.join(@output_directory, runner.project_name)
     
@@ -103,7 +93,7 @@ class ReportAssembler
       end
       
       File.open("#{filename}.json", 'w+') do |f|
-        f.puts(nullify_successful_exit_status_for_json_templates(runner.results).to_json)
+        f.puts runner.results.to_json
       end
       
       if runner.finished?

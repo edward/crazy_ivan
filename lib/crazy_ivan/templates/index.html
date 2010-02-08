@@ -205,7 +205,7 @@
             $("#" + domId + " .tests").prepend(tmpl("resultLinkTemplate", report));
             
             // add failed/success indication to link - inlining in the template screws up
-            if (report.test.exit_status) {
+            if (report.test.exit_status && report.test.exit_status != '0') {
               $("#" + domId + '-' + version).addClass('error');
             }
           });

@@ -15,16 +15,52 @@ class CrazyIvanTest < Test::Unit::TestCase
     `rm -rf test/projects/some-project`
   end
   
-  def test_runner
+  def test_runner_for_projects
+    setup_crazy_ivan
+    run_crazy_ivan do
+      projects = JSON.parse(File.open('test/ci-results/projects.json').read)["projects"]
+      assert_equal ["broken-tests", "completely-working"], projects
+    end
+  end
+  
+  def test_runner_for_broken_project
+    setup_crazy_ivan
+    run_crazy_ivan do
+      assert File.exists?('test/ci-results/broken-tests/recent.json')
+      assert File.exists?('test/ci-results/broken-tests/currently_building.json')
+      
+      recent_versions = JSON.parse(File.read('test/ci-results/broken-tests/recent.json'))["recent_versions"]
+      assert_equal ["a-valid-version"], recent_versions
+      
+      test_results = JSON.parse(File.read('test/ci-results/broken-tests/a-valid-version.json'))
+      
+      assert test_results["timestamp"]["start"]
+      assert test_results["timestamp"]["finish"]
+      
+      assert test_results["update"]["output"]
+      assert test_results["update"]["error"]
+      assert test_results["update"]["exit_status"] == '0'
+      
+      assert test_results["version"]["output"]
+      assert test_results["version"]["error"]
+      assert test_results["version"]["exit_status"] == '0'
+      
+      assert test_results["test"]["output"]
+      assert test_results["test"]["error"]
+      assert test_results["test"]["exit_status"] == '1'
+      
+      conclusion_report = JSON.parse(File.read('test/ci-results/broken-tests-conclusion-report.json'))
+      assert_equal test_results.to_yaml, conclusion_report.to_yaml
+    end
+  end
+  
+  def test_runner_for_working_project
     setup_crazy_ivan
     run_crazy_ivan do
       assert File.exists?('test/ci-results/index.html')
       assert File.exists?('test/ci-results/projects.json')
       assert File.exists?('test/ci-results/completely-working/recent.json')
       assert File.exists?('test/ci-results/completely-working/currently_building.json')
-      
-      projects = JSON.parse(File.open('test/ci-results/projects.json').read)["projects"]
-      assert_equal ["completely-working"], projects
       
       recent_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
       assert_equal ["a-valid-version"], recent_versions
@@ -35,8 +71,6 @@ class CrazyIvanTest < Test::Unit::TestCase
       
       assert_equal "completely-working", test_results["project_name"]
       
-      # FIXME add another project that fails so we can see its errors
-      
       # FIXME add projects that each fail (exit status non-zero) at different steps (in update, version, test)
       
       # FIXME use a time range here
@@ -45,15 +79,15 @@ class CrazyIvanTest < Test::Unit::TestCase
       
       assert test_results["update"]["output"]
       assert test_results["update"]["error"]
-      assert test_results["update"]["exit_status"] == nil
+      assert test_results["update"]["exit_status"] == '0'
       
       assert test_results["version"]["output"]
       assert test_results["version"]["error"]
-      assert test_results["version"]["exit_status"] == nil
+      assert test_results["version"]["exit_status"] == '0'
       
       assert test_results["test"]["output"]
       assert test_results["test"]["error"]
-      assert test_results["test"]["exit_status"] == nil
+      assert test_results["test"]["exit_status"] == '0'
     end
   end
   

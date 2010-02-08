@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+# This script is piped the results of the testing suite run.
+
+# If you're interested in bouncing the message to campfire, 
+# emailing, or otherwise sending notifications, this is the place to do it.
+
+# To enable campfire notifications, uncomment the next lines and make sure you have the httparty gem installed:
+# CAMPFIRE_ROOM_URL = 'http://your-company.campfirenow.com/room/265250'
+# CAMPFIRE_API_KEY = '23b8al234gkj80a3e372133l4k4j34275f80ef8971'
+# CRAZY_IVAN_REPORTS_URL = 'http://ci.your-projects.com'
+# IO.popen("test_report2campfire #{CAMPFIRE_ROOM_URL} #{CAMPFIRE_API_KEY} #{CRAZY_IVAN_REPORTS_URL}", 'w') {|f| f.puts STDIN.read }
+
+File.open('../../ci-results/broken-tests-conclusion-report.json', 'w+') do |f|
+  f << STDIN.read
+end
