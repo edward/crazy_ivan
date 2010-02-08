@@ -23,6 +23,21 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
+  def test_runner_skips_already_tested_versions
+    setup_crazy_ivan
+    run_crazy_ivan(false) {}
+    run_crazy_ivan do
+      TestRunner.any_instance.expects(:test!).times(0)
+      TestRunner.any_instance.expects(:run_conclusion_script).times(0)
+      
+      recent_broken_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
+      assert_equal ["a-valid-version"], recent_broken_versions
+      
+      recent_working_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
+      assert_equal ["a-valid-version"], recent_working_versions
+    end
+  end
+  
   def test_runner_for_broken_project
     setup_crazy_ivan
     run_crazy_ivan do
@@ -113,12 +128,12 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
-  def run_crazy_ivan
+  def run_crazy_ivan(remove_test_dir_on_complete = true)
     Dir.chdir('test/projects') do
       do_silently { CrazyIvan.generate_test_reports_in('../ci-results') }
     end
     yield
   ensure
-    `rm -rf test/ci-results`
+    `rm -rf test/ci-results` if remove_test_dir_on_complete
   end
 end
