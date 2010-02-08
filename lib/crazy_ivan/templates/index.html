@@ -147,7 +147,6 @@
         
         jQuery.getJSON(projectJsonPath, function(data) {
           json.projects.push({'name': name, reports: data});
-          console.debug(json);
           trigger_render();
         });
       }
