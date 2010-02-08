@@ -34,7 +34,7 @@ class ProcessManager
       end
     else
       if ci_already_running?
-        msg = "Detected another running CI process #{pid} - terminating myself"
+        msg = "Detected another running CI process #{pid} - interrupting and terminating myself"
         Syslog.warning msg
         puts msg
         Process.kill("INT", 0)
