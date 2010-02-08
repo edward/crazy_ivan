@@ -30,25 +30,33 @@ class CrazyIvanTest < Test::Unit::TestCase
       TestRunner.any_instance.expects(:test!).times(0)
       TestRunner.any_instance.expects(:run_conclusion_script).times(0)
       
-      recent_broken_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
-      assert_equal ["a-valid-version"], recent_broken_versions
+      broken_test_results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))['broken-tests']
+      broken_versions = broken_test_results.map {|r| r['version']['output'] }
+      assert_equal ["a-valid-version"], broken_versions
       
-      recent_working_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
-      assert_equal ["a-valid-version"], recent_working_versions
+      working_results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))['completely-working']
+      working_versions = working_results.map {|r| r['version']['output'] }
+      assert_equal ["a-valid-version"], working_versions
     end
   end
   
   def test_runner_for_broken_project
     setup_crazy_ivan
     run_crazy_ivan do
-      assert File.exists?('test/ci-results/broken-tests/recent.json')
+      assert File.exists?('test/ci-results/broken-tests/reports.json')
       assert File.exists?('test/ci-results/broken-tests/currently_building.json')
       
-      recent_versions = JSON.parse(File.read('test/ci-results/broken-tests/recent.json'))["recent_versions"]
-      assert_equal ["a-valid-version"], recent_versions
+      results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))['broken-tests']
+      versions = results.map {|r| r['version']['output'] }
+      assert_equal ["a-valid-version"], versions
+            
+      test_results = results.first
       
-      test_results = JSON.parse(File.read('test/ci-results/broken-tests/a-valid-version.json'))
+      assert_equal "broken-tests", test_results["project_name"]
       
+      # FIXME add projects that each fail (exit status non-zero) at different steps (in update, version, test)
+      
+      # FIXME use a time range here
       assert test_results["timestamp"]["start"]
       assert test_results["timestamp"]["finish"]
       
@@ -63,26 +71,20 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert test_results["test"]["output"]
       assert test_results["test"]["error"]
       assert test_results["test"]["exit_status"] == '1'
-      
-      conclusion_report = JSON.parse(File.read('test/ci-results/broken-tests-conclusion-report.json'))
-      assert_equal test_results.to_yaml, conclusion_report.to_yaml
     end
   end
   
   def test_runner_for_working_project
     setup_crazy_ivan
     run_crazy_ivan do
-      assert File.exists?('test/ci-results/index.html')
-      assert File.exists?('test/ci-results/projects.json')
-      assert File.exists?('test/ci-results/completely-working/recent.json')
+      assert File.exists?('test/ci-results/completely-working/reports.json')
       assert File.exists?('test/ci-results/completely-working/currently_building.json')
       
-      recent_versions = JSON.parse(File.read('test/ci-results/completely-working/recent.json'))["recent_versions"]
-      assert_equal ["a-valid-version"], recent_versions
-      
-      test_results = JSON.parse(File.read('test/ci-results/completely-working/a-valid-version.json'))
-      
-      # {"timestamp"=>{"finish"=>"Fri Jan 29 11:51:00 -0500 2010", "start"=>"Fri Jan 29 11:51:00 -0500 2010"}, "version"=>{"output"=>"a-valid-version", "exit_status"=>nil, "error"=>""}, "project_name"=>"completely-working", "update"=>{"output"=>"a-valid-update", "exit_status"=>nil, "error"=>""}, "test"=>{"output"=>"Some valid test results. No fails.", "exit_status"=>nil, "error"=>""}}
+      results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))['completely-working']
+      versions = results.map {|r| r['version']['output'] }
+      assert_equal ["a-valid-version"], versions
+            
+      test_results = results.first
       
       assert_equal "completely-working", test_results["project_name"]
       

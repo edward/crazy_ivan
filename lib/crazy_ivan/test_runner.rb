@@ -72,7 +72,7 @@ class TestRunner
             
             if options[:stream_test_results?]
               @results[:test][:output] = output
-              @report_assembler.update_project(self)
+              @report_assembler.update_currently_building(self)
             end
           end
           
@@ -83,7 +83,7 @@ class TestRunner
             
             if options[:stream_test_results?]
               @results[:test][:error] = error
-              @report_assembler.update_project(self)
+              @report_assembler.update_currently_building(self)
             end
           end
           
@@ -96,7 +96,7 @@ class TestRunner
             
             if options[:stream_test_results?]
               @results[:test][:error] = error
-              @report_assembler.update_project(self)
+              @report_assembler.update_currently_building(self)
             end
           end
         end
