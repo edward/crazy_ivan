@@ -79,7 +79,7 @@ class ReportAssembler
       Dir.chdir(project_name) do
         if !File.exists?('reports.json')
           File.open('reports.json', 'w+') do |f|
-            f.print(({project_name => []}).to_json)
+            f.puts [].to_json
           end
         end
       end
@@ -92,7 +92,7 @@ class ReportAssembler
     Dir.chdir(@output_directory) do
       projects.each do |project_name|
         reports = JSON.parse(File.read(File.expand_path('reports.json', project_name)))
-        @projects[project_name] = reports[project_name]
+        @projects[project_name] = reports
       end
     end
   end
@@ -125,7 +125,7 @@ class ReportAssembler
     
     Dir.chdir(project_path) do
       File.open("reports.json", 'w+') do |f|
-        f.puts(({runner.project_name => @projects[runner.project_name]}).to_json)
+        f.puts @projects[runner.project_name].to_json
       end
     end
   end

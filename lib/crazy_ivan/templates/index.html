@@ -143,34 +143,12 @@
       });
       
       function addProjectToJson(name) {
-        var project = {'name': name, reports: []};
-        var recentVersionsJsonPath = name + "/recent.json";
+        var projectJsonPath = name + "/reports.json";
         
-        jQuery.getJSON(recentVersionsJsonPath, function(data) {
-          jQuery.each(data.recent_versions, function(i, version) {
-            addReportToProject(project, version);
-          });
-        });
-        
-        json.projects.push(project);
-      }
-      
-      function addReportToProject(project, version) {
-        var name = project.name;
-        var resultJsonPath = name + "/" + version + ".json";
-        jQuery.getJSON(resultJsonPath, function(data) { 
-          project.reports.push(data);
+        jQuery.getJSON(projectJsonPath, function(data) {
+          json.projects.push({'name': name, reports: data});
+          console.debug(json);
           trigger_render();
-        });
-      }
-      
-      function sortReports(reports) {
-        return reports.sort(function(report_a, report_b) { 
-          // Not sure why providing a 3-letter day trips up Date.js sometimes
-          a = Date.parse(report_a.timestamp.finish.substring(4));
-          b = Date.parse(report_b.timestamp.finish.substring(4));
-          
-          return Date.compare(a, b);
         });
       }
       
@@ -189,8 +167,6 @@
           
           // create project holder div
           $('#projects').append(tmpl("projectTemplate", {projectName: name, projectId: domId}));
-          
-          project.reports = sortReports(project.reports);
           
           jQuery.each(project.reports, function(i, report) {
             var version = report.version.output;

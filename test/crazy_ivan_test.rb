@@ -30,11 +30,11 @@ class CrazyIvanTest < Test::Unit::TestCase
       TestRunner.any_instance.expects(:test!).times(0)
       TestRunner.any_instance.expects(:run_conclusion_script).times(0)
       
-      broken_test_results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))['broken-tests']
+      broken_test_results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))
       broken_versions = broken_test_results.map {|r| r['version']['output'] }
       assert_equal ["a-valid-version"], broken_versions
       
-      working_results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))['completely-working']
+      working_results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))
       working_versions = working_results.map {|r| r['version']['output'] }
       assert_equal ["a-valid-version"], working_versions
     end
@@ -46,7 +46,7 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert File.exists?('test/ci-results/broken-tests/reports.json')
       assert File.exists?('test/ci-results/broken-tests/currently_building.json')
       
-      results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))['broken-tests']
+      results = JSON.parse(File.read('test/ci-results/broken-tests/reports.json'))
       versions = results.map {|r| r['version']['output'] }
       assert_equal ["a-valid-version"], versions
             
@@ -80,7 +80,7 @@ class CrazyIvanTest < Test::Unit::TestCase
       assert File.exists?('test/ci-results/completely-working/reports.json')
       assert File.exists?('test/ci-results/completely-working/currently_building.json')
       
-      results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))['completely-working']
+      results = JSON.parse(File.read('test/ci-results/completely-working/reports.json'))
       versions = results.map {|r| r['version']['output'] }
       assert_equal ["a-valid-version"], versions
             
