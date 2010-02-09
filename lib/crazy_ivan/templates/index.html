@@ -63,9 +63,9 @@
       .project h2 { margin: 12px 0 0 0;}
 
       .tests { margin: 0 0 0 18px;}
-      .tests .test { font-size: 80%; margin-right: 8px}
+      .tests .test { margin-right: 8px}
       .tests a.test:hover { text-decoration: underline;}
-      .tests .test:first-child { font-size: 100%;}
+      .tests .test.first { font-size: 100%;}
       .tests .test.active { font-weight: bold;}
 
       .result .timestamp { margin-right: 12px;}
@@ -98,16 +98,22 @@
         <h2><%= projectName %></h2>
         
         <div class="tests"></div>
+        <div style="clear: left"></div>
         <div class="results"></div>
       <div>
     </script>
     
     <!-- test link template -->
     <script type="text/html" id="resultLinkTemplate">
-      <a id="<%= projectDomId %>-<%= version.output %>" class="test"><%= shortTimeStamp %></a>
+      <div style="float: left; margin-right: 8px">
+        <div style="float:left; height: 1.2em; font-size: 84%"><%= longTimeStamp %></div>
+        <div style="clear: left">
+          <a id="<%= projectDomId %>-<%= version.output %>" class="test"><%= shortTimeStamp %></a>
+        </div>
+      </div>
     </script>
     
-    <!-- build result holder -->
+    <!-- build rult holder -->
     <script type="text/html" id="resultTemplate">
       <div class="result <%= projectDomId %>-<%= version.output %>" style="display: none">
         <div>
@@ -133,9 +139,11 @@
 
     <script type="text/javascript" charset="utf-8">
       var json = {projects: []};
+      var projectNames;
       
       jQuery(document).ready(function($) {
         $.getJSON("projects.json", function(data) {
+          projectNames = data.projects;
           jQuery.each(data.projects, function(i, projectName) {
             addProjectToJson(projectName);
           });
@@ -157,27 +165,57 @@
         timeout = setTimeout(render, 50);
       }
       
+      function orderedProjects(projects) {
+        var orderedProjects = [];
+        
+        // order the projects by what the projects.json returns
+        for(var name in projectNames) {
+          for(var project in projects) {
+            if(projects[project].name == projectNames[name]) {
+              orderedProjects.push(projects[project]);
+              break;
+            }
+          }
+        }
+        return orderedProjects;
+      }
+      
       var render = function() {
         $('#projects').empty();
         
-        jQuery.each(json.projects, function(i, project) {
+        var sortedProjects = orderedProjects(json.projects);
+        
+        jQuery.each(sortedProjects, function(i, project) {
           var name = project.name;
           var domId = name.replace(/\./g, "");      // remove . from id name
           
           // create project holder div
           $('#projects').append(tmpl("projectTemplate", {projectName: name, projectId: domId}));
           
-          jQuery.each(project.reports, function(i, report) {
+          jQuery.each(project.reports.reverse(), function(i, report) {
             var version = report.version.output;
             var resultJsonPath = name + "/" + version + ".json";
             var domId = name.replace(/\./g, "");      // remove . from id name
             
+            var timestamp = report.timestamp.finish;
+            report["longTimeStamp"] = Date.parse(timestamp.substring(4)).toString("MMM d");
+            
+            // To group the long time stamps (e.g. Feb 8)
+            if(project.reports[i - 1] != undefined) {
+              next_timestamp = project.reports[i - 1].timestamp.finish;
+              next_longTimeStamp = Date.parse(next_timestamp.substring(4)).toString("MMM d");
+              
+              if(report["longTimeStamp"] == next_longTimeStamp) {
+                report["longTimeStamp"] = "";
+              }
+            }
+            
             // Not sure why providing a 3-letter day trips up Date.js sometimes
-            report["shortTimeStamp"] = Date.parse(report.timestamp.finish.substring(4)).toString("HH:mm");
+            report["shortTimeStamp"] = Date.parse(timestamp.substring(4)).toString("HH:mm");
             report["projectDomId"] = domId;
             
             $("#" + domId + " .results").append(tmpl("resultTemplate", report));
-            $("#" + domId + " .tests").prepend(tmpl("resultLinkTemplate", report));
+            $("#" + domId + " .tests").append(tmpl("resultLinkTemplate", report));
             
             // add failed/success indication to link - inlining in the template screws up
             if (report.test.exit_status && report.test.exit_status != '0') {
