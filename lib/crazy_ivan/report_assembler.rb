@@ -99,7 +99,6 @@ class ReportAssembler
   
   def update_currently_building(runner)
     project_path = File.expand_path(runner.project_name, @output_directory)
-    
     Dir.chdir(project_path) do
       File.open('currently_building.json', 'w+') do |f|
         f.puts runner.results.to_json

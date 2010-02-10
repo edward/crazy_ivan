@@ -3,11 +3,8 @@
 begin
   require 'crazy_ivan'
 rescue LoadError
-  # If people are not using gems, the load path must still
-  # be correct.
-  # TODO: Remove the begin / rescue block somehow
   $LOAD_PATH.unshift File.dirname(__FILE__) + '/../lib'
-  retry
+  require 'crazy_ivan'
 end
 
 require "optparse"
@@ -20,7 +17,7 @@ Signal.trap("INT") do
   CrazyIvan.interrupt_test
   ProcessManager.unlock
   puts
-  exit
+  exit(1)
 end
 
 def show_howto
@@ -68,14 +65,15 @@ ARGV.options do |opts|
   
   begin
     opts.parse!
-        
+    
     case ARGV[0]
     when /setup/
       CrazyIvan::setup
     when /\w+/  # a directory for test results
-      ProcessManager.acquire_lock do
-        Syslog.debug "Generating reports in #{ARGV[0]}"
+      begin
         CrazyIvan::generate_test_reports_in(ARGV[0])
+      rescue AlreadyRunningError
+        Process.kill('INT', 0)
       end
     else
       show_howto
@@ -83,4 +81,3 @@ ARGV.options do |opts|
     end
   end
 end
-

@@ -1,13 +1,14 @@
 require 'syslog'
 require 'fileutils'
 require 'yaml'
+require 'crazy_ivan/vendor/json'
+require 'crazy_ivan/vendor/open4'
+require 'crazy_ivan/vendor/tmpdir'
+require 'crazy_ivan/vendor/lockfile'
 require 'crazy_ivan/process_manager'
 require 'crazy_ivan/report_assembler'
 require 'crazy_ivan/test_runner'
 require 'crazy_ivan/version'
-require 'crazy_ivan/vendor/json'
-require 'crazy_ivan/vendor/open4'
-require 'crazy_ivan/vendor/tmpdir'
 
 module CrazyIvan
   def self.setup
@@ -114,20 +115,28 @@ module CrazyIvan
     puts
   end
 
-  def self.generate_test_reports_in(output_directory)
+  def self.generate_test_reports_in(path)
     Syslog.open('crazy_ivan', Syslog::LOG_PID | Syslog::LOG_CONS) unless Syslog.opened?
-    FileUtils.mkdir_p(output_directory)
     
-    report = ReportAssembler.new(Dir.pwd, output_directory)
-    report.generate
+    output_path = File.expand_path(path)
     
-    # TODO this should really indicate how many projects were tested
-    msg = "Generated test reports for #{report.runners.size} projects"
-    Syslog.info(msg)
-    puts msg
-    # REFACTOR to use a logger that spits out to both STDOUT and Syslog
-  ensure
-    Syslog.close
+    ProcessManager.acquire_lock! do
+      Syslog.debug "Generating reports in #{output_path}"
+      
+      FileUtils.mkdir_p(output_path)
+    
+      report = ReportAssembler.new(Dir.pwd, output_path)
+      report.generate
+    
+      # TODO indicate how many projects were tested
+      msg = "Ran CI on #{report.runners.size} projects"
+      
+      # REFACTOR to use a logger that spits out to both STDOUT and Syslog
+      Syslog.info(msg)
+      puts msg
+    end
+    
+    Syslog.close if Syslog.opened?
   end
   
   def self.interrupt_test

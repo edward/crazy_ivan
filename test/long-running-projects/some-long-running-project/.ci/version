@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+# This script grabs a unique version name from your version control system
+#
+# If you're not able to use a VCS, this script could just generate a timestamp.
+
+puts `git show`[/^commit (.+)$/, 1]

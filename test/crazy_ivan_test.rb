@@ -1,7 +1,11 @@
 require 'test_helper'
 require 'tmpdir'
 
-class CrazyIvanTest < Test::Unit::TestCase  
+class CrazyIvanTest < Test::Unit::TestCase
+  def teardown
+    `rm -rf test/ci-results`
+  end
+  
   def test_setup
     Dir.mkdir('test/projects/some-project')
     
@@ -15,6 +19,9 @@ class CrazyIvanTest < Test::Unit::TestCase
     `rm -rf test/projects/some-project`
   end
   
+  def test_empty_script_output
+  end
+  
   def test_runner_for_projects
     setup_crazy_ivan
     run_crazy_ivan do
@@ -25,7 +32,7 @@ class CrazyIvanTest < Test::Unit::TestCase
   
   def test_runner_skips_already_tested_versions
     setup_crazy_ivan
-    run_crazy_ivan(false) {}
+    run_crazy_ivan {}
     run_crazy_ivan do
       TestRunner.any_instance.expects(:test!).times(0)
       TestRunner.any_instance.expects(:run_conclusion_script).times(0)
@@ -130,12 +137,10 @@ class CrazyIvanTest < Test::Unit::TestCase
     end
   end
   
-  def run_crazy_ivan(remove_test_dir_on_complete = true)
+  def run_crazy_ivan
     Dir.chdir('test/projects') do
       do_silently { CrazyIvan.generate_test_reports_in('../ci-results') }
     end
     yield
-  ensure
-    `rm -rf test/ci-results` if remove_test_dir_on_complete
   end
 end
